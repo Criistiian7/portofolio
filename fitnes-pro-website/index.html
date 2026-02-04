@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fitness Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <section class="banner">
+      <div class="banner-overlay"></div>
+      <div class="banner-content">
+        <h1>Welcome to Fitness Pro</h1>
+        <p>Your ultimate companion for tracking your fitness journey</p>
+        <button class="cta-button">START NOW !</button>
+      </div>
+    </section>
+    <header class="app-header">
+      <div class="app-header-content">
+        <h1>Fitness Pro</h1>
+        <nav class="nav-menu">
+          <ul>
+            <li><a href="#progress-overview">Daily Stats</a></li>
+            <li><a href="#workouts">Workouts</a></li>
+            <li><a href="#goals">Goals</a></li>
+            <li><a href="#videos">Tutorials</a></li>
+          </ul>
+        </nav>
+        <button
+          class="hamburger-menu"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >
+          &#9776;
+        </button>
+        <img class="profile-pic" src="./icons/fitness.svg" alt="User Profile" />
+      </div>
+    </header>
+    <section class="progress-overview" id="progress-overview">
+      <h2>Daily Stats</h2>
+      <div class="progress-overview-content">
+        <div class="progress-card">
+          <h3>Steps</h3>
+          <div
+            class="progress-circle"
+            data-progress="75"
+            style="--progress: 75%"
+          ></div>
+          <p>7,500 / 10,000 steps</p>
+        </div>
+        <div class="progress-card">
+          <h3>Calories</h3>
+          <div
+            class="progress-circle"
+            data-progress="60"
+            style="--progress: 60%"
+          ></div>
+          <p>1,200 / 2,000 kcal</p>
+        </div>
+        <div class="progress-card">
+          <h3>Workout</h3>
+          <div
+            class="progress-circle"
+            data-progress="40"
+            style="--progress: 40%"
+          ></div>
+          <p>2 / 5 workouts</p>
+        </div>
+      </div>
+    </section>
+    <section class="workout-tracker" id="workouts">
+      <h2>Workouts</h2>
+      <div class="workout-grid">
+        <div class="workout-card completed">
+          <div class="img-container">
+            <img src="./icons/sports.svg" alt="Sports" />
+          </div>
+          <p>Sports</p>
+        </div>
+        <div class="workout-card upcoming">
+          <div class="img-container">
+            <img src="./icons/running.svg" alt="Running" />
+          </div>
+          <p>Running</p>
+        </div>
+        <div class="workout-card missed">
+          <div class="img-container">
+            <img
+              src="./icons/person-lifting-weights.svg"
+              alt="Weight training"
+            />
+          </div>
+          <p>Weights</p>
+        </div>
+        <div class="workout-card missed">
+          <div class="img-container">
+            <img src="./icons/yoga.svg" alt="Yoga" />
+          </div>
+          <p>Yoga</p>
+        </div>
+      </div>
+    </section>
+    <section class="goals-achievements" id="goals">
+      <h2>Goals & Achievements</h2>
+      <div class="badge-container">
+        <div class="badge">
+          <div class="img-container">
+            <img src="./icons/target-objective.svg" alt="Objective badge"/>
+          </div>
+          <p>First 10 Workouts</p>
+        </div>
+        <div class="badge">
+          <div class="img-container">
+            <img src="./icons/trophy.svg" alt="Trophy badge" />
+          </div>
+          <p>Completed 100 Miles</p>
+        </div>
+        <div class="badge">
+          <div class="img-container">
+            <img src="./icons/flame.svg" alt="Calories badge" />
+          </div>
+          <p>Burned 10,000 Calories</p>
+        </div>
+        <div class="badge">
+          <div class="img-container">
+            <img src="./icons/bolt-thunder.svg" alt="Streak badge" />
+          </div>
+          <p>7-Day Streak</p>
+        </div>
+      </div>
+    </section>
+    <section class="video-tutorials" id="videos">
+      <h2>Video Tutorials</h2>
+      <div class="video-list">
+        <div class="video-card">
+          <iframe src="https://www.youtube.com/embed/v7AYKMP6rOE" title="Morning Yoga tutorial"></iframe>
+          <h4>Morning Yoga</h4>
+        </div>
+        <div class="video-card">
+          <iframe src="https://www.youtube.com/embed/U0bhE67HuDY" title="Strength training tutorial"></iframe>
+          <h4>Strength Training</h4>
+        </div>
+        <div class="video-card">
+          <iframe src="https://www.youtube.com/embed/ml6cT4AZdqI" title="Full body HIIT tutorial"></iframe>
+          <h4>HIIT Basics</h4>
+        </div>
+      </div>
+    </section>
+    <footer class="app-footer">
+      <div class="app-footer-content">
+        <p>&copy; 2026 Fitness Pro. All Rights Reserved</p>
+        <div class="links">
+          <a href="#contact">Contact Us</a>
+          <a href="#privacy">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+    <script>
+      const btn = document.querySelector(".hamburger-menu");
+      const menu = document.querySelector(".nav-menu ul");
+      btn.addEventListener("click", () => {
+        menu.classList.toggle("show");
+        btn.setAttribute("aria-expanded", menu.classList.contains("show"));
+      });
+      document.querySelectorAll(".nav-menu a").forEach((link) => {
+        link.addEventListener("click", () => {
+          menu.classList.remove("show");
+          btn.setAttribute("aria-expanded", "false");
+        });
+      });
+    </script>
+  </body>
+</html>
