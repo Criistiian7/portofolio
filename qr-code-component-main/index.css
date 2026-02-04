@@ -1,55 +1,116 @@
-@import url("https://fonts.google.com/specimen/Outfit");
+/* ===== RESET ===== */
+
+* {
+  box-sizing: border-box;
+}
 
 body {
-  background-color: hsl(212, 45%, 89%);
+  margin: 0;
   font-family: "Outfit", sans-serif;
   font-size: 15px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+}
+
+/* ===== LAYOUT ===== */
+
+.page {
+  flex: 1;
+  display: flex;
   align-items: center;
-  min-height: 100vh;
-  margin: 0;
+  justify-content: center;
   padding: 20px;
 }
 
+/* ===== CARD ===== */
+
 .card {
-  background-color: hsl(0, 0%, 100%);
+  background: #ffffff;
   border-radius: 20px;
-  padding: 16px;
-  max-width: 320px;
+  padding: 20px;
+  max-width: 340px;
   text-align: center;
-  box-shadow: 0 25px 25px rgba(0, 0, 0, 0.0476518);
+
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 30px 40px rgba(0, 0, 0, 0.08);
 }
 
 .card img {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-bottom: 24px;
+  border: none;
+  background: white;
 }
 
 .card h1 {
   font-size: 22px;
   font-weight: 700;
-  color: hsl(218, 44%, 22%);
-  margin: 0 0 16px 0;
+  margin-bottom: 16px;
+  color: #0f172a;
 }
 
 .card p {
-  font-size: 15px;
-  font-weight: 400;
-  color: hsl(216, 15%, 48%);
   margin: 0;
-  line-height: 1.4;
+  color: #475569;
+  line-height: 1.5;
 }
 
+/* ===== FOOTER ===== */
+
 .attribution {
-  font-size: 11px;
   text-align: center;
-  margin-top: 24px;
-  color: hsl(216, 15%, 48%);
+  font-size: 12px;
+  padding: 20px;
+  color: #94a3b8;
 }
 
 .attribution a {
-  color: hsl(228, 45%, 44%);
+  color: #38bdf8;
+}
+
+.attribution a:hover {
+  text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 360px) {
+  .card h1 {
+    font-size: 18px;
+  }
+}
+
+/* ===== DARK MODE ===== */
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #ffffff;
+    color: #032859;
+  }
+
+  .card h1 {
+    color: #3388dd;
+  }
+
+  .card p {
+    color: #314b92;
+  }
+
+  .card img {
+    border-color: #1e293b;
+    background: white;
+  }
 }
