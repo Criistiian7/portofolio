@@ -28,7 +28,10 @@ export default defineConfig([
         describe: 'readonly',
         it: 'readonly',
         expect: 'readonly',
+<<<<<<< HEAD
         beforeEach: 'readonly',
+=======
+>>>>>>> 3984937 (fix(typing-speed-app-react): split vite and vitest config for Vercel build)
       },
     },
   },
