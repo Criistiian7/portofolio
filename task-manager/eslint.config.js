@@ -20,19 +20,4 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
-  {
-    files: ['**/*.{test,spec}.{ts,tsx}'],
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-<<<<<<< HEAD
-        beforeEach: 'readonly',
-=======
->>>>>>> 3984937 (fix(typing-speed-app-react): split vite and vitest config for Vercel build)
-      },
-    },
-  },
 ])
