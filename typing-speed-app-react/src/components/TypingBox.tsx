@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { easyQuotes, mediumQuotes, hardQuotes } from "../utils/quotes";
+import { fetchQuote } from "../services/api";
 
 type Props = {
   difficulty: string;
@@ -8,38 +8,28 @@ type Props = {
   setAccuracy: (acc: number) => void;
 };
 
-export default function TypingBox({
-  difficulty,
-  onFinish,
-  setWpm,
-  setAccuracy,
-}: Props) {
+export default function TypingBox({ onFinish, setWpm, setAccuracy }: Props) {
   const [quote, setQuote] = useState("");
   const [input, setInput] = useState("");
   const [time, setTime] = useState(60);
   const [start, setStart] = useState<Date | null>(null);
 
-  const getQuotes = () => {
-    if (difficulty === "easy") return easyQuotes;
-    if (difficulty === "medium") return mediumQuotes;
-    return hardQuotes;
-  };
-
   useEffect(() => {
-    const selected = getQuotes();
-    const random = selected[Math.floor(Math.random() * selected.length)];
-    setQuote(random);
-    setInput("");
-    setTime(60);
-    setStart(null);
-  }, [difficulty]);
+    loadQuote();
+    reset();
+  }, []);
+
+  const loadQuote = async () => {
+    const q = await fetchQuote();
+    setQuote(q);
+  };
 
   const finishTest = useCallback(() => {
     if (!start) return;
     const elapsed = (60 - time) / 60;
     const words = input.length / 5;
     const wpm = Math.round(words / elapsed);
-    onFinish(isNaN(wpm) ? 0 : wpm);
+    onFinish(wpm);
   }, [time, input, start, onFinish]);
 
   useEffect(() => {
@@ -58,8 +48,18 @@ export default function TypingBox({
     return () => clearInterval(timer);
   }, [start, finishTest]);
 
+  const playSound = () => {
+    const audio = new Audio(
+      "https://www.soundjay.com/mechanical/keyboard-1.mp3",
+    );
+    audio.volume = 0.1;
+    audio.play();
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!start) setStart(new Date());
+
+    playSound();
 
     const value = e.target.value;
     setInput(value);
@@ -81,13 +81,27 @@ export default function TypingBox({
     setWpm(isNaN(wpm) ? 0 : wpm);
   };
 
+  const progress = (input.length / quote.length) * 100;
+
+  const reset = () => {
+    setInput("");
+    setTime(60);
+    setStart(null);
+    setWpm(0);
+    setAccuracy(100);
+  };
+
   return (
     <div className="card typing-box">
+      <div className="progress">
+        <div style={{ width: `${progress}%` }}></div>
+      </div>
+
       <p className="quote">
         {quote.split("").map((char, i) => {
           let color = "";
           if (i < input.length) {
-            color = input[i] === char ? "green" : "red";
+            color = input[i] === char ? "#22c55e" : "#ef4444";
           }
           return (
             <span key={i} style={{ color }}>
@@ -98,6 +112,9 @@ export default function TypingBox({
       </p>
 
       <textarea value={input} onChange={handleChange} />
+
+      <button onClick={reset}>Reset</button>
+
       <p className="timer">Time: {time}s</p>
     </div>
   );
