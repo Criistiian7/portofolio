@@ -38,10 +38,18 @@ export default function TypingBox({
     setQuote(modified);
   }, [difficulty]);
 
+  const reset = useCallback(() => {
+    setInput("");
+    setTime(60);
+    setStart(null);
+    setWpm(0);
+    setAccuracy(100);
+  }, [setWpm, setAccuracy]);
+
   useEffect(() => {
     loadQuote();
     reset();
-  }, [difficulty, loadQuote]);
+  }, [difficulty, loadQuote, reset]);
 
   const finishTest = useCallback(() => {
     if (!start) return;
@@ -109,14 +117,6 @@ export default function TypingBox({
   };
 
   const progress = quote.length ? (input.length / quote.length) * 100 : 0;
-
-  const reset = () => {
-    setInput("");
-    setTime(60);
-    setStart(null);
-    setWpm(0);
-    setAccuracy(100);
-  };
 
   return (
     <div className="card typing-box">
