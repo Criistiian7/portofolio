@@ -14,23 +14,20 @@ export default function TypingBox({
   setWpm,
   setAccuracy,
 }: Props) {
-  const [quote, setQuote] = useState<string>("");
-  const [input, setInput] = useState<string>("");
-  const [time, setTime] = useState<number>(60);
+  const [quote, setQuote] = useState("");
+  const [input, setInput] = useState("");
+  const [time, setTime] = useState(60);
   const [start, setStart] = useState<Date | null>(null);
 
-  const getQuotesByDifficulty = () => {
+  const getQuotes = () => {
     if (difficulty === "easy") return easyQuotes;
     if (difficulty === "medium") return mediumQuotes;
     return hardQuotes;
   };
 
-  // 🔹 set quote
   useEffect(() => {
-    const selectedQuotes = getQuotesByDifficulty();
-    const random =
-      selectedQuotes[Math.floor(Math.random() * selectedQuotes.length)];
-
+    const selected = getQuotes();
+    const random = selected[Math.floor(Math.random() * selected.length)];
     setQuote(random);
     setInput("");
     setTime(60);
@@ -39,15 +36,12 @@ export default function TypingBox({
 
   const finishTest = useCallback(() => {
     if (!start) return;
-
     const elapsed = (60 - time) / 60;
     const words = input.length / 5;
     const wpm = Math.round(words / elapsed);
-
     onFinish(isNaN(wpm) ? 0 : wpm);
   }, [time, input, start, onFinish]);
 
-  // 🔹 timer
   useEffect(() => {
     if (!start) return;
 
@@ -64,16 +58,13 @@ export default function TypingBox({
     return () => clearInterval(timer);
   }, [start, finishTest]);
 
-  // 🔹 typing logic
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!start) setStart(new Date());
 
     const value = e.target.value;
     setInput(value);
 
-    // accuracy
     let correct = 0;
-
     value.split("").forEach((char, i) => {
       if (char === quote[i]) correct++;
     });
@@ -81,7 +72,6 @@ export default function TypingBox({
     const acc = Math.round((correct / value.length) * 100);
     setAccuracy(isNaN(acc) ? 100 : acc);
 
-    // WPM live
     const elapsed =
       (new Date().getTime() - (start?.getTime() || Date.now())) / 60000;
 
@@ -92,16 +82,13 @@ export default function TypingBox({
   };
 
   return (
-    <div>
-      {/* 🔥 highlight */}
-      <p>
+    <div className="card typing-box">
+      <p className="quote">
         {quote.split("").map((char, i) => {
           let color = "";
-
           if (i < input.length) {
             color = input[i] === char ? "green" : "red";
           }
-
           return (
             <span key={i} style={{ color }}>
               {char}
@@ -111,8 +98,7 @@ export default function TypingBox({
       </p>
 
       <textarea value={input} onChange={handleChange} />
-
-      <p>Time: {time}</p>
+      <p className="timer">Time: {time}s</p>
     </div>
   );
 }

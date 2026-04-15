@@ -5,10 +5,18 @@ type Props = {
 
 export default function Stats({ wpm, accuracy }: Props) {
   return (
-    <div>
+    <div className="card stats">
       <h3>Stats</h3>
-      <p>WPM: {wpm}</p>
-      <p>Accuracy: {accuracy}%</p>
+      <div className="stats-grid">
+        <div className="stat-box">
+          <span>WPM</span>
+          <strong>{wpm}</strong>
+        </div>
+        <div className="stat-box">
+          <span>Accuracy</span>
+          <strong>{accuracy}%</strong>
+        </div>
+      </div>
     </div>
   );
 }

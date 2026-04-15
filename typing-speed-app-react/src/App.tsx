@@ -12,9 +12,14 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Typing Speed Test</h1>
+      <h1 className="title">Typing Speed Test</h1>
 
       <DifficultySelector setDifficulty={setDifficulty} />
+
+      <div className="dashboard">
+        <Stats wpm={wpm} accuracy={accuracy} />
+        <Leaderboard newScore={score} />
+      </div>
 
       <TypingBox
         difficulty={difficulty}
@@ -22,10 +27,6 @@ function App() {
         setWpm={setWpm}
         setAccuracy={setAccuracy}
       />
-
-      <Stats wpm={wpm} accuracy={accuracy} />
-
-      <Leaderboard newScore={score} />
     </div>
   );
 }
