@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { easyQuotes, mediumQuotes, hardQuotes } from "../utils/quotes";
 
 type Props = {
@@ -14,22 +14,40 @@ export default function TypingBox({
   setWpm,
   setAccuracy,
 }: Props) {
-  const [quote, setQuote] = useState("");
-  const [input, setInput] = useState("");
-  const [time, setTime] = useState(60);
+  const [quote, setQuote] = useState<string>("");
+  const [input, setInput] = useState<string>("");
+  const [time, setTime] = useState<number>(60);
   const [start, setStart] = useState<Date | null>(null);
 
+  const getQuotesByDifficulty = () => {
+    if (difficulty === "easy") return easyQuotes;
+    if (difficulty === "medium") return mediumQuotes;
+    return hardQuotes;
+  };
+
+  // 🔹 set quote
   useEffect(() => {
-    let selected;
+    const selectedQuotes = getQuotesByDifficulty();
+    const random =
+      selectedQuotes[Math.floor(Math.random() * selectedQuotes.length)];
 
-    if (difficulty === "easy") selected = easyQuotes;
-    if (difficulty === "medium") selected = mediumQuotes;
-    if (difficulty === "hard") selected = hardQuotes;
-
-    const random = selected[Math.floor(Math.random() * selected.length)];
     setQuote(random);
+    setInput("");
+    setTime(60);
+    setStart(null);
   }, [difficulty]);
 
+  const finishTest = useCallback(() => {
+    if (!start) return;
+
+    const elapsed = (60 - time) / 60;
+    const words = input.length / 5;
+    const wpm = Math.round(words / elapsed);
+
+    onFinish(isNaN(wpm) ? 0 : wpm);
+  }, [time, input, start, onFinish]);
+
+  // 🔹 timer
   useEffect(() => {
     if (!start) return;
 
@@ -44,24 +62,18 @@ export default function TypingBox({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [start]);
+  }, [start, finishTest]);
 
-  const finishTest = () => {
-    const elapsed = (60 - time) / 60;
-    const words = input.length / 5;
-    const wpm = Math.round(words / elapsed);
-
-    onFinish(wpm);
-  };
-
+  // 🔹 typing logic
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!start) setStart(new Date());
 
     const value = e.target.value;
     setInput(value);
 
-    // Accuracy
+    // accuracy
     let correct = 0;
+
     value.split("").forEach((char, i) => {
       if (char === quote[i]) correct++;
     });
@@ -70,7 +82,9 @@ export default function TypingBox({
     setAccuracy(isNaN(acc) ? 100 : acc);
 
     // WPM live
-    const elapsed = (new Date().getTime() - (start?.getTime() || 0)) / 60000;
+    const elapsed =
+      (new Date().getTime() - (start?.getTime() || Date.now())) / 60000;
+
     const words = value.length / 5;
     const wpm = Math.round(words / elapsed);
 
@@ -79,6 +93,7 @@ export default function TypingBox({
 
   return (
     <div>
+      {/* 🔥 highlight */}
       <p>
         {quote.split("").map((char, i) => {
           let color = "";
