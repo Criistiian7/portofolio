@@ -4,30 +4,23 @@ type Props = {
 };
 
 const OPTIONS = [
-  { id: "easy", label: "Short" },
-  { id: "medium", label: "Medium" },
-  { id: "hard", label: "Long" },
-] as const;
+  { value: "easy", label: "Short" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Long" },
+];
 
-export default function DifficultySelector({
-  difficulty,
-  setDifficulty,
-}: Props) {
+export default function DifficultySelector({ difficulty, setDifficulty }: Props) {
   return (
-    <div
-      className="difficulty"
-      role="group"
-      aria-label="Quote length"
-    >
-      {OPTIONS.map(({ id, label }) => (
+    <div className="difficulty" role="group" aria-label="Quote length">
+      {OPTIONS.map((option) => (
         <button
-          key={id}
+          key={option.value}
+          className={`segment ${difficulty === option.value ? "active" : ""}`}
+          onClick={() => setDifficulty(option.value)}
+          aria-pressed={difficulty === option.value}
           type="button"
-          className={`difficulty-btn${difficulty === id ? " active" : ""}`}
-          onClick={() => setDifficulty(id)}
-          aria-pressed={difficulty === id}
         >
-          {label}
+          {option.label}
         </button>
       ))}
     </div>

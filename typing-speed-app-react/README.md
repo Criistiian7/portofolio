@@ -1,46 +1,51 @@
-# Typing Speed Test
+# Typing Test Pro
 
-A small React + TypeScript + Vite app that measures **typing speed (WPM)** and **accuracy** on random quotes, keeps a **local leaderboard** in the browser, and supports **15 / 30 / 60 second** timers with **light and dark** themes.
+A React + TypeScript typing app focused on consistent metrics and practical UX:
+track corrected WPM, raw WPM, and accuracy in timed sessions with local score history.
 
 ## Features
 
-- Random quotes from the [DummyJSON](https://dummyjson.com/docs/quotes) API, with a **local fallback list** if the network fails.
-- **Net WPM** using the usual convention: correct characters ÷ 5, divided by elapsed time in minutes. **Accuracy** is correct keystrokes ÷ total keystrokes.
-- Timer presets **15s, 30s, 60s**; test ends when the timer reaches zero **or** when you type the full quote.
-- Optional **key click** sound (off by default) using a bundled `public/typing.wav` file—no external audio URLs.
-- **Leaderboard** stored in `localStorage` (name, WPM, timestamp), top 10 scores.
-- **Sign out** clears the session name from `localStorage` (scores remain unless you clear site data).
+- Session durations: `15s`, `30s`, `60s`
+- Quote length presets: short, medium, long
+- Live stats: WPM, raw WPM, and accuracy
+- Auto-finish on timeout or when the full quote is completed
+- Local leaderboard with player name, score, and date
+- Persistent theme (`light`/`dark`) and signed-in user
+- Quote fetch from DummyJSON with local fallback quotes
+- Optional local typing sound (`/public/typing.wav`)
 
-## Tech stack
+## Tech Stack
 
-- React 19, TypeScript, Vite 8
-- Vitest + Testing Library for unit tests on pure logic (`src/lib`)
+- React 19 + TypeScript
+- Vite 8
+- ESLint 9
 
-## Run locally
+## Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-```bash
-npm run build
-npm run preview
-```
+Useful scripts:
 
-```bash
-npm run typecheck
-npm run lint
-npm run test
-```
+- `npm run lint`
+- `npm run typecheck`
+- `npm run build`
 
-## Decisions & limitations
+## Metric Formula
 
-- **WPM formula**: net WPM = (correct characters ÷ 5) ÷ (elapsed minutes). Elapsed time is measured from the first keystroke to finish (timer expiry or completing the quote).
-- **Quote length**: “Short / Medium / Long” trims the same fetched quote to 5, 10, or all words—length, not a separate word list.
-- **Leaderboard**: browser-only; clearing storage or using another device loses entries.
-- **Sound**: browsers may block autoplay until there has been user interaction; the toggle stays available.
+This app computes:
 
-## Live demo
+- `correctChars`: typed characters that match the quote at the same index
+- `accuracy`: `correctChars / totalTypedChars * 100`
+- `wpm`: `(correctChars / 5) / elapsedMinutes`
+- `rawWpm`: `(totalTypedChars / 5) / elapsedMinutes`
 
-Add your deployed URL here after you publish the build.
+`elapsedMinutes` is measured from the first typed character until finish.
+
+## Known Limitations
+
+- Leaderboard is local-only (`localStorage`) and device-specific
+- Quote API is external; fallback quotes are used on fetch failure
+- No backend auth (player name is stored locally)

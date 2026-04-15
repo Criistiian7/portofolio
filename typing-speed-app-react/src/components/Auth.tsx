@@ -7,34 +7,25 @@ type Props = {
 export default function Auth({ setUser }: Props) {
   const [name, setName] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!name.trim()) return;
-    localStorage.setItem("user", name.trim());
-    setUser(name.trim());
+    const normalized = name.trim();
+    localStorage.setItem("user", normalized);
+    setUser(normalized);
   };
 
   return (
-    <div className="auth-wrap">
-      <div className="card auth">
-        <h2 className="card-title">Start typing</h2>
-        <label className="auth-label" htmlFor="display-name">
-          Your name
-        </label>
-        <input
-          id="display-name"
-          name="display-name"
-          autoComplete="username"
-          placeholder="Enter your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleLogin();
-          }}
-        />
-        <button type="button" onClick={handleLogin}>
-          Start
-        </button>
-      </div>
-    </div>
+    <form className="card auth" onSubmit={handleLogin}>
+      <label htmlFor="username">Name</label>
+      <input
+        id="username"
+        placeholder="Enter your name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        autoFocus
+      />
+      <button type="submit">Start</button>
+    </form>
   );
 }

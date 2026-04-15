@@ -1,53 +1,28 @@
-import { useEffect, useState } from "react";
-import {
-  type LeaderboardEntry,
-  LEADERBOARD_STORAGE_KEY,
-  mergeNewEntry,
-  readLeaderboard,
-} from "../lib/leaderboard";
-
-export type FinishSignal = { wpm: number; at: number } | null;
+import { type LeaderboardEntry } from "../utils/leaderboard";
 
 type Props = {
-  userName: string;
-  finishSignal: FinishSignal;
+  scores: LeaderboardEntry[];
 };
 
-export default function Leaderboard({ userName, finishSignal }: Props) {
-  const [scores, setScores] = useState<LeaderboardEntry[]>([]);
-
-  useEffect(() => {
-    setScores(readLeaderboard(localStorage));
-  }, []);
-
-  useEffect(() => {
-    if (!finishSignal) return;
-
-    const entry: LeaderboardEntry = {
-      name: userName,
-      wpm: finishSignal.wpm,
-      at: finishSignal.at,
-    };
-
-    const current = readLeaderboard(localStorage);
-    const updated = mergeNewEntry(current, entry);
-    localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(updated));
-    setScores(updated);
-  }, [finishSignal, userName]);
-
+export default function Leaderboard({ scores }: Props) {
   return (
     <div className="card leaderboard">
       <h3 className="card-title">Leaderboard</h3>
       <ul>
-        {scores.map((s, i) => (
-          <li key={`${s.at}-${i}`}>
-            #{i + 1} — {s.name} — {s.wpm} WPM
-            <span className="leaderboard-date">
-              {" "}
-              ({new Date(s.at).toLocaleString()})
-            </span>
-          </li>
-        ))}
+        {scores.length === 0 ? (
+          <li className="leaderboard-empty">No scores yet.</li>
+        ) : (
+          scores.map((score, i) => (
+            <li key={`${score.name}-${score.at}-${i}`}>
+              <span className="leaderboard-rank">#{i + 1}</span>
+              <span className="leaderboard-name">{score.name}</span>
+              <span className="leaderboard-wpm">{score.wpm} WPM</span>
+              <time className="leaderboard-date" dateTime={score.at}>
+                {new Date(score.at).toLocaleDateString()}
+              </time>
+            </li>
+          ))
+        )}
       </ul>
     </div>
   );
