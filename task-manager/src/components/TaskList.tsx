@@ -1,10 +1,11 @@
 import { useTasks } from "../context/useTasks";
 import TaskItem from "./TaskItem";
+import { isTaskDone } from "../types/Task";
 
 export default function TaskList() {
   const { tasks, isLoading, error, refreshTasks } = useTasks();
-  const activeTasks = tasks.filter((task) => !task.completed);
-  const completedTasks = tasks.filter((task) => task.completed);
+  const activeTasks = tasks.filter((task) => !isTaskDone(task));
+  const completedTasks = tasks.filter((task) => isTaskDone(task));
 
   if (isLoading) {
     return (

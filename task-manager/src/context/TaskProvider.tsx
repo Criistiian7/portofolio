@@ -19,6 +19,7 @@ export const TaskProvider = ({
     updateTask,
     deleteTask,
     toggleTask,
+    setTaskStatus,
     pendingTaskIds,
   } = useTasksLogic(userId);
 
@@ -38,6 +39,7 @@ export const TaskProvider = ({
         updateTask,
         deleteTask,
         toggleTask,
+        setTaskStatus,
         isTaskPending: (id: string) => pendingTaskIds.includes(id),
       }}
     >

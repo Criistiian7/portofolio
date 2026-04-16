@@ -39,3 +39,45 @@
     min-height: 100vh;
   }
 }
+
+@layer utilities {
+  /* Scrollbars aligned with slate-950 / emerald accents (TaskTable, modals) */
+  .scrollbar-app {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(51 65 85 / 0.85) rgb(15 23 42 / 0.55);
+  }
+
+  .scrollbar-app::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  .scrollbar-app::-webkit-scrollbar-track {
+    margin: 4px;
+    border-radius: 9999px;
+    background: rgb(15 23 42 / 0.65);
+  }
+
+  .scrollbar-app::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: linear-gradient(
+      180deg,
+      rgb(16 185 129 / 0.35),
+      rgb(56 189 248 / 0.25)
+    );
+    border: 2px solid rgb(15 23 42 / 0.4);
+    background-clip: padding-box;
+  }
+
+  .scrollbar-app::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      rgb(16 185 129 / 0.55),
+      rgb(56 189 248 / 0.4)
+    );
+  }
+
+  .scrollbar-app::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}

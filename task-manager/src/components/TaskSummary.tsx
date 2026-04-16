@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useTasks } from "../context/useTasks";
+import { isTaskDone } from "../types/Task";
 
 type SummaryCardProps = {
   label: string;
@@ -25,10 +26,10 @@ export default function TaskSummary() {
   const { tasks } = useTasks();
 
   const summary = useMemo(() => {
-    const completed = tasks.filter((task) => task.completed).length;
+    const completed = tasks.filter((task) => isTaskDone(task)).length;
     const active = tasks.length - completed;
     const highPriority = tasks.filter(
-      (task) => !task.completed && task.priority === "high",
+      (task) => !isTaskDone(task) && task.priority === "high",
     ).length;
 
     return {

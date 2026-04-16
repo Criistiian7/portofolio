@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Task, TaskDraft } from "../types/Task";
+import type { Task, TaskDraft, TaskStatus } from "../types/Task";
 
 export type TaskContextValue = {
   tasks: Task[];
@@ -11,6 +11,7 @@ export type TaskContextValue = {
   updateTask: (id: string, task: TaskDraft) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleTask: (id: string) => Promise<void>;
+  setTaskStatus: (id: string, status: TaskStatus) => Promise<void>;
   isTaskPending: (id: string) => boolean;
 };
 

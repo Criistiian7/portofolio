@@ -5,18 +5,122 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwnedByCurrentUser(data) {
+    function normalizedEmail() {
+      return request.auth.token.email == null
+        ? ''
+        : request.auth.token.email.lower();
+    }
+
+    function isParticipant(data) {
+      return (data.participantIds is list && request.auth.uid in data.participantIds)
+        || (data.ownerId is string && data.ownerId == request.auth.uid)
+        || (data.assigneeUid is string && data.assigneeUid == request.auth.uid);
+    }
+
+    function isTaskOwner(data) {
       return data.ownerId is string && data.ownerId == request.auth.uid;
     }
 
-    match /tasks/{taskId} {
-      allow create: if isSignedIn() && isOwnedByCurrentUser(request.resource.data);
+    function isTaskAssignee(data) {
+      return data.assigneeUid is string && data.assigneeUid == request.auth.uid;
+    }
 
-      allow read, delete: if isSignedIn() && isOwnedByCurrentUser(resource.data);
+    function participantIdsUnchanged() {
+      return request.resource.data.participantIds == resource.data.participantIds
+        || !(resource.data.participantIds is list);
+    }
+
+    function ownerFieldsStableForAssignee() {
+      return request.resource.data.ownerId == resource.data.ownerId
+        && participantIdsUnchanged()
+        && request.resource.data.assigneeUid == resource.data.assigneeUid
+        && request.resource.data.project == resource.data.project
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function assigneeUpdateAllowed() {
+      return ownerFieldsStableForAssignee()
+        && request.resource.data.keys().hasOnly([
+          'text',
+          'description',
+          'priority',
+          'status',
+          'dueDate',
+          'project',
+          'ownerId',
+          'participantIds',
+          'assigneeUid',
+          'assigneeDisplayName',
+          'assigneePhotoURL',
+          'createdAt',
+          'updatedAt'
+        ]);
+    }
+
+    function ownerWriteAllowed() {
+      return request.resource.data.ownerId == request.auth.uid
+        && resource.data.ownerId == request.auth.uid
+        && request.auth.uid in request.resource.data.participantIds;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && !('contacts' in request.resource.data)
+        && request.resource.data.keys().hasOnly(['email', 'displayName', 'photoURL', 'updatedAt']);
 
       allow update: if isSignedIn()
-        && isOwnedByCurrentUser(resource.data)
-        && isOwnedByCurrentUser(request.resource.data);
+        && request.auth.uid == userId
+        && request.resource.data.contacts == resource.data.contacts
+        && request.resource.data.keys().hasOnly(['email', 'displayName', 'photoURL', 'updatedAt', 'contacts']);
+    }
+
+    match /invites/{inviteId} {
+      allow read: if isSignedIn()
+        && (
+          resource.data.fromUid == request.auth.uid
+          || (
+            resource.data.toEmail is string
+            && resource.data.toEmail == normalizedEmail()
+          )
+        );
+
+      allow create, update, delete: if false;
+    }
+
+    match /tasks/{taskId} {
+      allow read: if isSignedIn() && isParticipant(resource.data);
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.auth.uid in request.resource.data.participantIds
+        && request.resource.data.keys().hasOnly([
+          'text',
+          'description',
+          'priority',
+          'status',
+          'dueDate',
+          'project',
+          'ownerId',
+          'participantIds',
+          'assigneeUid',
+          'assigneeDisplayName',
+          'assigneePhotoURL',
+          'createdAt',
+          'updatedAt'
+        ]);
+
+      allow delete: if isSignedIn() && isTaskOwner(resource.data);
+
+      allow update: if isSignedIn() && isTaskOwner(resource.data) && ownerWriteAllowed();
+
+      allow update: if isSignedIn()
+        && isParticipant(resource.data)
+        && isTaskAssignee(resource.data)
+        && !isTaskOwner(resource.data)
+        && assigneeUpdateAllowed();
     }
   }
 }

@@ -1,8 +1,14 @@
+import { auth } from "../firebase/config";
+import { useContacts } from "../hooks/useContacts";
+import { useProfileLabels } from "../hooks/useProfileLabels";
 import { useTasks } from "../context/useTasks";
 import TaskForm from "./TaskForm";
 
 export default function TaskInput() {
   const { addTask, isCreating } = useTasks();
+  const uid = auth?.currentUser?.uid ?? null;
+  const contactUids = useContacts(uid);
+  const { labelFor } = useProfileLabels(contactUids);
 
   return (
     <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-slate-950/20 backdrop-blur-xl">
@@ -26,6 +32,8 @@ export default function TaskInput() {
           submitLabel="Add task"
           onSubmit={addTask}
           disabled={isCreating}
+          contactUids={contactUids}
+          contactLabel={labelFor}
         />
       </div>
     </aside>

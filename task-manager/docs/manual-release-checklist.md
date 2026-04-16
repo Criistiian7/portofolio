@@ -18,12 +18,13 @@ Run these checks before calling the project portfolio-ready:
 12. Sign in with a second account and confirm it sees a separate scoped workspace.
 13. Trigger a Firestore permission failure intentionally, if possible, and confirm the UI shows a readable error.
 14. Check the layout on a narrow mobile viewport and a desktop viewport.
+15. **Invites:** Send an invite to a second account’s email; confirm it appears under **Sent** for the inviter and **Incoming** for the recipient. Decline on the recipient and confirm status updates. Send another invite, open the `?invite=` link (or use **Accept** in the sidebar), and confirm both users appear in each other’s contacts for assignment.
 
 ## Release Readiness
 
 1. Populate `.env.local` and confirm the selected Firebase project is intentional.
 2. Enable Firebase Authentication email/password for the target project.
-3. Deploy `firestore.rules` and Hosting using the steps in `docs/firebase-deploy.md` (or an equivalent pipeline).
+3. Deploy Firestore rules, indexes, Cloud Functions, and Hosting using `docs/firebase-deploy.md` (or an equivalent pipeline). This project does not use SQL migrations or Entity Framework; rollout is Firebase-only.
 4. Verify Firestore collection `tasks` exists and supports the current query strategy.
 5. Review the README and confirm every claimed feature exists in the UI.
 6. Run your local lint/build checks before publishing.

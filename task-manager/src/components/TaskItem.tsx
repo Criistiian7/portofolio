@@ -2,8 +2,12 @@ import { useState } from "react";
 import confetti from "canvas-confetti";
 import { useTasks } from "../context/useTasks";
 import type { Task } from "../types/Task";
+import { isTaskDone } from "../types/Task";
+import { auth } from "../firebase/config";
 import Modal from "./Modal";
 import TaskForm from "./TaskForm";
+import { useContacts } from "../hooks/useContacts";
+import { useProfileLabels } from "../hooks/useProfileLabels";
 
 type Props = {
   task: Task;
@@ -11,16 +15,20 @@ type Props = {
 
 export default function TaskItem({ task }: Props) {
   const { deleteTask, toggleTask, updateTask, isTaskPending } = useTasks();
+  const currentUid = auth?.currentUser?.uid ?? null;
+  const contactUids = useContacts(currentUid);
+  const { labelFor } = useProfileLabels(contactUids);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const isPending = isTaskPending(task.id);
+  const isOwner = task.ownerId === currentUid;
 
   const confirm = async () => {
     try {
       await toggleTask(task.id);
       setOpen(false);
 
-      if (!task.completed) {
+      if (!isTaskDone(task)) {
         confetti();
       }
     } catch {
@@ -32,7 +40,7 @@ export default function TaskItem({ task }: Props) {
     <>
       <article
         className={`rounded-[2rem] border p-5 shadow-xl shadow-slate-950/20 backdrop-blur transition hover:-translate-y-0.5 ${
-          task.completed
+          isTaskDone(task)
             ? "border-emerald-400/30 bg-emerald-500/10"
             : "border-white/10 bg-white/5"
         }`}
@@ -40,7 +48,7 @@ export default function TaskItem({ task }: Props) {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              {task.category}
+              {task.project}
             </p>
             <h3 className="mt-3 text-xl font-semibold text-white">{task.text}</h3>
           </div>
@@ -61,8 +69,12 @@ export default function TaskItem({ task }: Props) {
           {task.description || "No description provided."}
         </p>
         <p className="mt-4 text-sm text-slate-400">
-          {task.completed ? "Completed" : "In progress"} • Updated{" "}
-          {new Date(task.updatedAt).toLocaleString()}
+          {task.status === "done"
+            ? "Done"
+            : task.status === "in_progress"
+              ? "In progress"
+              : "To do"}{" "}
+          • Updated {new Date(task.updatedAt).toLocaleString()}
         </p>
 
         {editing ? (
@@ -72,11 +84,16 @@ export default function TaskItem({ task }: Props) {
               initialValues={{
                 text: task.text,
                 description: task.description,
-                category: task.category,
                 priority: task.priority,
+                dueDate: task.dueDate,
+                project: task.project,
+                assigneeUid: task.assigneeUid,
               }}
               submitLabel="Save changes"
               disabled={isPending}
+              contactUids={contactUids}
+              contactLabel={labelFor}
+              ownershipLocked={!isOwner}
               onCancel={() => setEditing(false)}
               onSubmit={async (updatedTask) => {
                 await updateTask(task.id, updatedTask);
@@ -89,7 +106,7 @@ export default function TaskItem({ task }: Props) {
             <button
               className="inline-flex items-center justify-center rounded-2xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
               onClick={() => {
-                if (task.completed) {
+                if (isTaskDone(task)) {
                   void toggleTask(task.id).catch(() => {});
                   return;
                 }
@@ -98,7 +115,7 @@ export default function TaskItem({ task }: Props) {
               }}
               disabled={isPending}
             >
-              {task.completed ? "Reopen" : "Mark complete"}
+              {isTaskDone(task) ? "Reopen" : "Mark complete"}
             </button>
             <button
               className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-white/10 disabled:cursor-not-allowed disabled:border-white/5 disabled:text-slate-500"
@@ -107,20 +124,22 @@ export default function TaskItem({ task }: Props) {
             >
               Edit
             </button>
-            <button
-              className="inline-flex items-center justify-center rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-100 transition hover:border-rose-400/40 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:border-white/5 disabled:text-slate-500"
-              onClick={async () => {
-                if (!window.confirm("Delete this task permanently?")) return;
-                try {
-                  await deleteTask(task.id);
-                } catch {
-                  return;
-                }
-              }}
-              disabled={isPending}
-            >
-              Delete
-            </button>
+            {isOwner ? (
+              <button
+                className="inline-flex items-center justify-center rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-100 transition hover:border-rose-400/40 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:border-white/5 disabled:text-slate-500"
+                onClick={async () => {
+                  if (!window.confirm("Delete this task permanently?")) return;
+                  try {
+                    await deleteTask(task.id);
+                  } catch {
+                    return;
+                  }
+                }}
+                disabled={isPending}
+              >
+                Delete
+              </button>
+            ) : null}
           </div>
         )}
       </article>

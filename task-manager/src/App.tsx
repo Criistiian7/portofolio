@@ -1,22 +1,92 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { TaskProvider } from "./context/TaskProvider";
-import TaskInput from "./components/TaskInput";
-import TaskList from "./components/TaskList";
-import Navbar from "./components/Navbar";
 import Auth from "./components/Auth";
-import TaskSummary from "./components/TaskSummary";
+import DashboardView from "./components/dashboard/DashboardView";
+import AppShell from "./components/layout/AppShell";
 import { auth, firebaseConfigError, firebaseProjectId } from "./firebase/config";
+import { useUserProfileSync } from "./hooks/useUserProfileSync";
+import { acceptInvite, hasPendingInvitesForUserEmail } from "./lib/invites";
 
-export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthReady, setIsAuthReady] = useState(() => auth === null);
+function AuthenticatedApp({ user }: { user: User }) {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
+
+  useUserProfileSync(user);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hadInvite = params.has("invite");
+    const inviteParam = params.get("invite")?.trim() ?? null;
+
+    const email = user.email?.trim();
+    if (!email) {
+      return;
+    }
+
+    const stripInviteFromUrl = () => {
+      if (!hadInvite) {
+        return;
+      }
+      params.delete("invite");
+      const query = params.toString();
+      const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", next);
+    };
+
+    void (async () => {
+      try {
+        let shouldCall = Boolean(inviteParam);
+
+        if (!shouldCall) {
+          try {
+            shouldCall = await hasPendingInvitesForUserEmail(email);
+          } catch {
+            shouldCall = true;
+          }
+        }
+
+        if (!shouldCall) {
+          return;
+        }
+
+        if (inviteParam) {
+          await acceptInvite({ inviteId: inviteParam });
+        } else {
+          await acceptInvite();
+        }
+      } catch {
+        // best-effort; user can accept from the sidebar inbox
+      } finally {
+        stripInviteFromUrl();
+      }
+    })();
+  }, [user.uid, user.email]);
+
+  return (
+    <TaskProvider userId={user.uid}>
+      <AppShell>
+        <DashboardView
+          user={user}
+          dark={dark}
+          onToggleTheme={() => setDark((current) => !current)}
+          onSignOut={async () => {
+            if (!auth) return;
+            await signOut(auth);
+          }}
+        />
+      </AppShell>
+    </TaskProvider>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(() => auth === null);
 
   useEffect(() => {
     if (!auth) {
@@ -88,26 +158,5 @@ export default function App() {
 
   if (!user) return <Auth />;
 
-  return (
-    <TaskProvider userId={user.uid}>
-      <main className="min-h-screen bg-slate-950 text-slate-100 transition-colors dark:bg-slate-950">
-        <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <Navbar
-            user={user.displayName?.trim() || user.email || "Signed-in user"}
-            dark={dark}
-            toggleDark={() => setDark((current) => !current)}
-            logout={async () => {
-              if (!auth) return;
-              await signOut(auth);
-            }}
-          />
-          <TaskSummary />
-          <section className="grid gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
-            <TaskInput />
-            <TaskList />
-          </section>
-        </div>
-      </main>
-    </TaskProvider>
-  );
+  return <AuthenticatedApp user={user} />;
 }
