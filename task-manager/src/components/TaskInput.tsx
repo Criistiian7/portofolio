@@ -7,14 +7,16 @@ export default function TaskInput() {
   const [text, setText] = useState("");
   const [category, setCategory] = useState("Work");
   const [tags, setTags] = useState("");
+  const [priority, setPriority] = useState("medium");
 
-  const handleAdd = () => {
+  const submit = () => {
     if (!text.trim()) return;
 
     addTask({
       text,
       completed: false,
       category,
+      priority,
       tags: tags.split(",").map((t) => t.trim()),
     });
 
@@ -36,13 +38,19 @@ export default function TaskInput() {
         <option>Other</option>
       </select>
 
+      <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+
       <input
         value={tags}
         onChange={(e) => setTags(e.target.value)}
-        placeholder="tags (comma)"
+        placeholder="tags"
       />
 
-      <button onClick={handleAdd}>Add</button>
+      <button onClick={submit}>Add Task</button>
     </div>
   );
 }

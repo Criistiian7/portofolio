@@ -5,26 +5,22 @@ export default function TaskItem({ task }: { task: Task }) {
   const { toggleTask, deleteTask } = useTasks();
 
   return (
-    <div className="task-item">
+    <div className={`task-item ${task.priority}`}>
       <div>
-        <span
-          onClick={() => toggleTask(task.id)}
-          className={task.completed ? "done" : ""}
-        >
-          {task.text}
-        </span>
+        <span onClick={() => toggleTask(task.id)}>{task.text}</span>
 
         <div className="meta">
-          <small>{task.category}</small>
-          <div className="tags">
-            {task.tags.map((t, i) => (
-              <span key={i}>#{t}</span>
-            ))}
-          </div>
+          {task.category} • {task.priority}
+        </div>
+
+        <div className="tags">
+          {task.tags.map((t, i) => (
+            <span key={i}>#{t}</span>
+          ))}
         </div>
       </div>
 
-      <button onClick={() => deleteTask(task.id)}>🗑</button>
+      <button onClick={() => deleteTask(task.id)}>✕</button>
     </div>
   );
 }

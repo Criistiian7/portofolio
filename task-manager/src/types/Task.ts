@@ -4,4 +4,5 @@ export type Task = {
   completed: boolean;
   category: string;
   tags: string[];
+  priority: "low" | "medium" | "high";
 };

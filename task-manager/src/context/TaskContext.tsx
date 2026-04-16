@@ -1,13 +1,12 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { Task } from "../types/Task";
+import { getTasks, saveTasks } from "../services/taskService";
 
 type ContextType = {
   tasks: Task[];
   addTask: (task: Omit<Task, "id">) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
-  editTask: (id: string, updated: Partial<Task>) => void;
-  reorderTasks: (start: number, end: number) => void;
 };
 
 const TaskContext = createContext<ContextType | null>(null);
@@ -18,16 +17,15 @@ export const useTasks = () => {
   return ctx;
 };
 
-export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
+export const TaskProvider = ({ children }: any) => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("tasks");
-    if (saved) setTasks(JSON.parse(saved));
+    getTasks().then(setTasks);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
+    saveTasks(tasks);
   }, [tasks]);
 
   const addTask = (task: Omit<Task, "id">) => {
@@ -44,21 +42,8 @@ export const TaskProvider = ({ children }: { children: React.ReactNode }) => {
     setTasks(tasks.filter((t) => t.id !== id));
   };
 
-  const editTask = (id: string, updated: Partial<Task>) => {
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, ...updated } : t)));
-  };
-
-  const reorderTasks = (start: number, end: number) => {
-    const updated = [...tasks];
-    const [moved] = updated.splice(start, 1);
-    updated.splice(end, 0, moved);
-    setTasks(updated);
-  };
-
   return (
-    <TaskContext.Provider
-      value={{ tasks, addTask, toggleTask, deleteTask, editTask, reorderTasks }}
-    >
+    <TaskContext.Provider value={{ tasks, addTask, toggleTask, deleteTask }}>
       {children}
     </TaskContext.Provider>
   );

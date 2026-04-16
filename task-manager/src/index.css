@@ -165,3 +165,23 @@ button:hover {
     padding: 16px;
   }
 }
+
+select {
+  appearance: none;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.task-item.low {
+  border-left: 4px solid #22c55e;
+}
+
+.task-item.medium {
+  border-left: 4px solid #f59e0b;
+}
+
+.task-item.high {
+  border-left: 4px solid #ef4444;
+}
