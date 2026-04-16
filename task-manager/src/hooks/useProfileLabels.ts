@@ -26,6 +26,7 @@ export function useProfileLabels(uids: string[]) {
       return;
     }
 
+    const firestore = db;
     const unique = Array.from(new Set(uids));
     const nextLabels: Record<string, string> = Object.fromEntries(
       unique.map((uid) => [uid, uid]),
@@ -35,7 +36,7 @@ export function useProfileLabels(uids: string[]) {
 
     const unsubs = unique.map((uid) =>
       onSnapshot(
-        doc(db, "users", uid),
+        doc(firestore, "users", uid),
         (snap) => {
           const name = snap.data()?.displayName;
           const label = typeof name === "string" && name.trim() ? name.trim() : uid;
