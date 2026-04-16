@@ -83,7 +83,7 @@ function App() {
             {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
           <button type="button" className="ghost-btn danger" onClick={handleSignOut}>
-            Sign out
+            Change User
           </button>
         </div>
       </div>
