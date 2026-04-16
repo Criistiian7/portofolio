@@ -1,37 +1,21 @@
 import { useState } from "react";
-import { TaskProvider, useTasks } from "./context/TaskContext";
+import { TaskProvider } from "./context/TaskContext";
 import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
-import Filter from "./components/Filter";
-
-function AppContent() {
-  const { tasks } = useTasks();
-  const [filter, setFilter] = useState("all");
-
-  const filtered = tasks.filter((task) => {
-    if (filter === "active") return !task.completed;
-    if (filter === "completed") return task.completed;
-    return true;
-  });
-
-  return (
-    <div className="app">
-      <h1>Task Manager</h1>
-
-      <TaskInput />
-      <Filter setFilter={setFilter} />
-
-      {filtered.map((task) => (
-        <div key={task.id}>{task.text}</div>
-      ))}
-    </div>
-  );
-}
+import SearchBar from "./components/SearchBar";
 
 export default function App() {
+  const [search, setSearch] = useState("");
+
   return (
     <TaskProvider>
-      <AppContent />
+      <div className="app">
+        <h1>Task Manager</h1>
+
+        <SearchBar setSearch={setSearch} />
+        <TaskInput />
+        <TaskList search={search} />
+      </div>
     </TaskProvider>
   );
 }

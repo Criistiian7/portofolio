@@ -1,4 +1,4 @@
-import { Task } from "../types/Task";
+import type { Task } from "../types/Task";
 import { useTasks } from "../context/TaskContext";
 
 export default function TaskItem({ task }: { task: Task }) {
@@ -6,14 +6,25 @@ export default function TaskItem({ task }: { task: Task }) {
 
   return (
     <div className="task-item">
-      <span
-        onClick={() => toggleTask(task.id)}
-        className={task.completed ? "done" : ""}
-      >
-        {task.text}
-      </span>
+      <div>
+        <span
+          onClick={() => toggleTask(task.id)}
+          className={task.completed ? "done" : ""}
+        >
+          {task.text}
+        </span>
 
-      <button onClick={() => deleteTask(task.id)}>X</button>
+        <div className="meta">
+          <small>{task.category}</small>
+          <div className="tags">
+            {task.tags.map((t, i) => (
+              <span key={i}>#{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <button onClick={() => deleteTask(task.id)}>🗑</button>
     </div>
   );
 }
