@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import TypingBox from "./components/TypingBox";
 import Stats from "./components/Stats";
 import Leaderboard from "./components/Leaderboard";
@@ -9,8 +9,11 @@ import {
   LEADERBOARD_STORAGE_KEY,
   mergeScore,
   parseLeaderboard,
+  type LeaderboardDifficulty,
   type LeaderboardEntry,
 } from "./utils/leaderboard";
+
+const LEADERBOARD_BROADCAST = "typing-leaderboard-sync";
 
 function App() {
   const [user, setUser] = useState<string | null>(() =>
@@ -20,6 +23,40 @@ function App() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() =>
     parseLeaderboard(localStorage.getItem(LEADERBOARD_STORAGE_KEY)),
   );
+
+  const leaderboardChannelRef = useRef<BroadcastChannel | null>(null);
+
+  useEffect(() => {
+    const refreshLeaderboard = () => {
+      setLeaderboard(
+        parseLeaderboard(localStorage.getItem(LEADERBOARD_STORAGE_KEY)),
+      );
+    };
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === LEADERBOARD_STORAGE_KEY && e.newValue != null) {
+        refreshLeaderboard();
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", refreshLeaderboard);
+
+    try {
+      const channel = new BroadcastChannel(LEADERBOARD_BROADCAST);
+      leaderboardChannelRef.current = channel;
+      channel.onmessage = refreshLeaderboard;
+    } catch {
+      leaderboardChannelRef.current = null;
+    }
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", refreshLeaderboard);
+      leaderboardChannelRef.current?.close();
+      leaderboardChannelRef.current = null;
+    };
+  }, []);
   const [wpm, setWpm] = useState(0);
   const [rawWpm, setRawWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
@@ -67,11 +104,17 @@ function App() {
             name: user,
             wpm: finalWpm,
             at: new Date().toISOString(),
+            difficulty: difficulty as LeaderboardDifficulty,
           };
 
           setLeaderboard((prev) => {
             const updated = mergeScore(prev, entry);
             localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(updated));
+            try {
+              leaderboardChannelRef.current?.postMessage({ type: "leaderboard" });
+            } catch {
+              /* ignore */
+            }
             return updated;
           });
         }}

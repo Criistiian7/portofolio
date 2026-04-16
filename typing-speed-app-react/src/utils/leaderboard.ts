@@ -1,10 +1,20 @@
+export type LeaderboardDifficulty = "easy" | "medium" | "hard";
+
 export type LeaderboardEntry = {
   name: string;
   wpm: number;
   at: string;
+  difficulty: LeaderboardDifficulty;
 };
 
 export const LEADERBOARD_STORAGE_KEY = "scores";
+
+const normalizeDifficulty = (value: unknown): LeaderboardDifficulty => {
+  if (value === "easy" || value === "medium" || value === "hard") {
+    return value;
+  }
+  return "easy";
+};
 
 const normalizeEntry = (
   item: LeaderboardEntry | number,
@@ -14,6 +24,7 @@ const normalizeEntry = (
       name: "Player",
       wpm: item,
       at: new Date().toISOString(),
+      difficulty: "easy",
     };
   }
 
@@ -22,7 +33,12 @@ const normalizeEntry = (
     typeof item?.wpm === "number" &&
     typeof item?.at === "string"
   ) {
-    return item;
+    return {
+      name: item.name,
+      wpm: item.wpm,
+      at: item.at,
+      difficulty: normalizeDifficulty(item.difficulty),
+    };
   }
 
   return null;
@@ -39,15 +55,32 @@ export const parseLeaderboard = (raw: string | null): LeaderboardEntry[] => {
     return parsed
       .map(normalizeEntry)
       .filter((entry): entry is LeaderboardEntry => entry !== null)
-      .sort((a, b) => b.wpm - a.wpm)
-      .slice(0, 10);
+      .sort((a, b) => b.wpm - a.wpm);
   } catch {
     return [];
   }
 };
 
+const TOP_PER_DIFFICULTY = 10;
+
 export const mergeScore = (
   current: LeaderboardEntry[],
   next: LeaderboardEntry,
-): LeaderboardEntry[] =>
-  [...current, next].sort((a, b) => b.wpm - a.wpm).slice(0, 10);
+): LeaderboardEntry[] => {
+  const merged = [...current, next];
+  const byDiff = new Map<LeaderboardDifficulty, LeaderboardEntry[]>();
+
+  for (const entry of merged) {
+    const list = byDiff.get(entry.difficulty) ?? [];
+    list.push(entry);
+    byDiff.set(entry.difficulty, list);
+  }
+
+  const out: LeaderboardEntry[] = [];
+  for (const list of byDiff.values()) {
+    list.sort((a, b) => b.wpm - a.wpm);
+    out.push(...list.slice(0, TOP_PER_DIFFICULTY));
+  }
+
+  return out.sort((a, b) => b.wpm - a.wpm);
+};

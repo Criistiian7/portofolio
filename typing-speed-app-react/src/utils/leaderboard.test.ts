@@ -16,17 +16,19 @@ describe("parseLeaderboard", () => {
 });
 
 describe("mergeScore", () => {
-  it("sorts descending and limits to top 10", () => {
+  it("sorts descending and limits to top 10 per difficulty", () => {
     const base: LeaderboardEntry[] = Array.from({ length: 10 }, (_, index) => ({
       name: `P${index}`,
       wpm: 10 + index,
       at: `2026-01-0${(index % 9) + 1}`,
+      difficulty: "easy" as const,
     }));
 
     const merged = mergeScore(base, {
       name: "Top",
       wpm: 200,
       at: "2026-01-10",
+      difficulty: "easy",
     });
 
     expect(merged).toHaveLength(10);

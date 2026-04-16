@@ -1,6 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { fetchQuote } from "../services/api";
+import {
+  clearQuotePrefetch,
+  consumeQuoteOrFetch,
+  prefetchNextQuote,
+} from "../services/api";
 import { computeStats } from "../utils/stats";
+
+const SOUND_STORAGE_KEY = "typingSoundOn";
 
 type Props = {
   difficulty: string;
@@ -26,18 +32,40 @@ export default function TypingBox({
   const [startMs, setStartMs] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [soundOn, setSoundOn] = useState(false);
+  const [soundOn, setSoundOn] = useState(() => {
+    try {
+      return localStorage.getItem(SOUND_STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
   const [isFinished, setIsFinished] = useState(false);
+  const [roundAnnouncement, setRoundAnnouncement] = useState("");
+  const [roundFlash, setRoundFlash] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const latestInputRef = useRef("");
+  const segmentStartMsRef = useRef<number | null>(null);
+  const timeRef = useRef(time);
+
+  useEffect(() => {
+    timeRef.current = time;
+  }, [time]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SOUND_STORAGE_KEY, String(soundOn));
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, [soundOn]);
 
   const loadQuote = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
 
-    const q = await fetchQuote();
+    const q = await consumeQuoteOrFetch();
 
     if (!q) {
       setQuote("");
@@ -57,12 +85,17 @@ export default function TypingBox({
     }
 
     setQuote(modified);
+    setRoundAnnouncement("");
     setIsLoading(false);
+    queueMicrotask(() => {
+      inputRef.current?.focus();
+    });
   }, [difficulty]);
 
   const reset = useCallback(() => {
     setInput("");
     latestInputRef.current = "";
+    segmentStartMsRef.current = null;
     setTime(duration);
     setStartMs(null);
     setIsFinished(false);
@@ -73,19 +106,50 @@ export default function TypingBox({
   }, [duration, setWpm, setRawWpm, setAccuracy]);
 
   useEffect(() => {
-    loadQuote();
+    clearQuotePrefetch();
+    void loadQuote();
     reset();
   }, [difficulty, loadQuote, reset]);
+
+  useEffect(() => {
+    if (!roundFlash) return;
+    const id = window.setTimeout(() => setRoundFlash(false), 520);
+    return () => window.clearTimeout(id);
+  }, [roundFlash]);
+
+  useEffect(() => {
+    if (!quote || isLoading || isFinished || loadError) return;
+    const remaining = quote.length - input.length;
+    const words = quote.trim().split(/\s+/).filter(Boolean);
+    const tailStr =
+      words.length >= 2 ? words.slice(-2).join(" ") : words[0] ?? quote;
+    const threshold = Math.min(tailStr.length + 3, quote.length);
+    if (remaining > 0 && remaining <= threshold) {
+      prefetchNextQuote();
+    }
+  }, [quote, input, isLoading, isFinished, loadError]);
 
   useEffect(() => {
     setTime(duration);
   }, [duration]);
 
+  useEffect(() => {
+    if (!quote) return;
+    segmentStartMsRef.current = null;
+    setInput("");
+    latestInputRef.current = "";
+  }, [quote]);
+
   const finishTest = useCallback(
-    (finalInput: string, endedAt: number, startedAt: number | null) => {
+    (finalInput: string, endedAt: number) => {
       if (isFinished) return;
 
-      const stats = computeStats(quote, finalInput, startedAt, endedAt);
+      const stats = computeStats(
+        quote,
+        finalInput,
+        segmentStartMsRef.current,
+        endedAt,
+      );
       setWpm(stats.wpm);
       setRawWpm(stats.rawWpm);
       setAccuracy(stats.accuracy);
@@ -102,7 +166,7 @@ export default function TypingBox({
       setTime((prev) => {
         if (prev === 1) {
           clearInterval(timer);
-          finishTest(latestInputRef.current, Date.now(), startMs);
+          finishTest(latestInputRef.current, Date.now());
           return 0;
         }
         return prev - 1;
@@ -124,7 +188,9 @@ export default function TypingBox({
   const playSound = () => {
     if (!audioRef.current || !soundOn) return;
     audioRef.current.currentTime = 0;
-    void audioRef.current.play();
+    void audioRef.current.play().catch(() => {
+      /* autoplay blocked until user gesture — ignore */
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -134,26 +200,51 @@ export default function TypingBox({
 
     if (!startMs) setStartMs(now);
 
+    if (segmentStartMsRef.current === null) {
+      segmentStartMsRef.current = now;
+    }
+
     playSound();
 
     const value = e.target.value;
     setInput(value);
     latestInputRef.current = value;
 
-    const stats = computeStats(quote, value, nextStart, now);
+    const stats = computeStats(quote, value, segmentStartMsRef.current, now);
     setAccuracy(stats.accuracy);
     setWpm(stats.wpm);
     setRawWpm(stats.rawWpm);
 
     if (value.length >= quote.length) {
-      finishTest(value, now, nextStart);
+      if (timeRef.current > 0) {
+        const roundStats = computeStats(
+          quote,
+          value,
+          segmentStartMsRef.current,
+          now,
+        );
+        onFinish(roundStats.wpm);
+        setWpm(0);
+        setRawWpm(0);
+        setAccuracy(100);
+        setInput("");
+        latestInputRef.current = "";
+        segmentStartMsRef.current = null;
+        setRoundAnnouncement("Round complete. Next quote loading.");
+        setRoundFlash(true);
+        void loadQuote();
+        return;
+      }
+      finishTest(value, now);
     }
   };
 
   const progress = quote.length ? (input.length / quote.length) * 100 : 0;
 
   return (
-    <div className="card typing-box">
+    <div
+      className={`card typing-box${roundFlash ? " typing-box--round-complete" : ""}`}
+    >
       <div className="typing-controls">
         <div className="timer-presets" role="group" aria-label="Timer duration">
           {TIMER_OPTIONS.map((option) => (
@@ -165,6 +256,7 @@ export default function TypingBox({
                 setDuration(option);
                 setTime(option);
                 setStartMs(null);
+                segmentStartMsRef.current = null;
                 setIsFinished(false);
                 setInput("");
                 setWpm(0);
@@ -178,7 +270,13 @@ export default function TypingBox({
           ))}
         </div>
 
-        <button type="button" className="ghost-btn" onClick={() => setSoundOn((prev) => !prev)}>
+        <button
+          type="button"
+          className="ghost-btn"
+          onClick={() => setSoundOn((prev) => !prev)}
+          aria-pressed={soundOn}
+          title="Toggle keystroke sound"
+        >
           Sound: {soundOn ? "On" : "Off"}
         </button>
       </div>
@@ -222,7 +320,9 @@ export default function TypingBox({
         value={input}
         onChange={handleChange}
         placeholder="Start typing the text above..."
-        disabled={isLoading || !!loadError || isFinished}
+        disabled={!!loadError || isFinished}
+        readOnly={isLoading}
+        aria-busy={isLoading}
         aria-label="Typing input area"
       />
 
@@ -230,14 +330,27 @@ export default function TypingBox({
         <button type="button" onClick={reset}>
           Reset
         </button>
-        <button type="button" onClick={loadQuote}>
+        <button
+          type="button"
+          accessKey="n"
+          onClick={() => void loadQuote()}
+          title="Load a new quote (browser access shortcut when focused elsewhere; often Alt+Shift+N)"
+        >
           New quote
         </button>
       </div>
 
+      <p className="keyboard-hints" aria-label="Keyboard shortcuts">
+        Tab moves through timer, sound, typing area, then actions. New quote may
+        support a browser access shortcut when this control is not focused (see
+        its title).
+      </p>
+
       <p className="timer">Time: {time}s</p>
-      <p className="sr-only" aria-live="polite">
-        {isFinished ? "Test finished." : "Test in progress."}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {isFinished
+          ? "Session finished."
+          : roundAnnouncement || "Session in progress."}
       </p>
     </div>
   );
