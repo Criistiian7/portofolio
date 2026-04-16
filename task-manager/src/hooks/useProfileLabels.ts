@@ -1,15 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
+import { useDemoMode } from "../context/DemoModeContext";
 
 /**
  * Loads `users/{uid}.displayName` for a small list of UIDs (e.g. assignee picker).
  */
 export function useProfileLabels(uids: string[]) {
+  const demoMode = useDemoMode();
   const [labels, setLabels] = useState<Record<string, string>>({});
   const uidKey = useMemo(() => [...uids].sort().join(","), [uids]);
 
   useEffect(() => {
+    if (demoMode.isDemo) {
+      const next: Record<string, string> = {};
+      for (const uid of new Set(uids)) {
+        next[uid] = demoMode.demoLabels[uid] ?? uid;
+      }
+      setLabels(next);
+      return;
+    }
+
     if (!db || uids.length === 0) {
       setLabels({});
       return;
@@ -45,7 +56,7 @@ export function useProfileLabels(uids: string[]) {
     return () => {
       cancelled = true;
     };
-  }, [uidKey]);
+  }, [uidKey, demoMode]);
 
   const labelFor = (uid: string) => labels[uid] ?? uid;
 

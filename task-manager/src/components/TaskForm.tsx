@@ -4,6 +4,7 @@ import {
   type TaskDraft,
   type TaskPriority,
 } from "../types/Task";
+import { formatDateDdMmYyyy } from "../lib/dates";
 
 export const PROJECT_OPTIONS = [
   "General",
@@ -125,13 +126,24 @@ export default function TaskForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2 text-sm text-slate-300">
           <span className="font-medium text-slate-200">Due date</span>
-          <input
-            type="date"
-            className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none focus:border-sky-400"
-            value={dueDate}
-            onChange={(event) => setDueDate(event.target.value)}
-            disabled={disabled}
-          />
+          <div className="input-date-shell relative">
+            <span
+              className={`pointer-events-none absolute inset-y-0 left-4 z-10 flex items-center text-sm ${
+                dueDate ? "text-slate-100" : "text-slate-400"
+              }`}
+            >
+              {dueDate ? formatDateDdMmYyyy(dueDate) : "dd/mm/yyyy"}
+            </span>
+            <input
+              type="date"
+              lang="en-GB"
+              className="input-date-app w-full rounded-2xl border border-white/10 px-4 py-3 text-sm outline-none focus:border-sky-400"
+              value={dueDate}
+              onChange={(event) => setDueDate(event.target.value)}
+              disabled={disabled}
+              aria-label="Due date"
+            />
+          </div>
         </label>
 
         <label className="grid gap-2 text-sm text-slate-300">

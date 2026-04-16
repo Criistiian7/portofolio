@@ -7,6 +7,7 @@ type Props = {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onSignOut: () => void;
+  signOutLabel?: string;
 };
 
 function UserAvatar({ user }: { user: User }) {
@@ -42,14 +43,17 @@ export default function TopNav({
   searchQuery,
   onSearchChange,
   onSignOut,
+  signOutLabel = "Sign out",
 }: Props) {
   return (
     <header className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-white/5 p-4 shadow-2xl shadow-slate-950/20 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:p-6">
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/20 text-lg font-bold text-emerald-200">
-            TM
-          </div>
+          <img
+            src="/app-logo.svg"
+            alt="Task Manager logo"
+            className="h-11 w-11 shrink-0 rounded-2xl border border-white/10 bg-slate-950/40 object-cover shadow-lg shadow-slate-950/30"
+          />
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-300">
               Task Manager
@@ -98,7 +102,7 @@ export default function TopNav({
             void onSignOut();
           }}
         >
-          Sign out
+          {signOutLabel}
         </button>
       </div>
     </header>

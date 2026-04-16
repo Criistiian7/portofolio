@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { Task } from "../../types/Task";
 import { isTaskDone } from "../../types/Task";
+import { formatDateTimeDdMmYyyy } from "../../lib/dates";
 
 type Props = {
   tasks: Task[];
@@ -32,11 +33,7 @@ function CompletedRow({ task }: { task: Task }) {
           {task.text}
         </p>
         <p className="mt-1 text-xs text-slate-500">
-          Completed{" "}
-          {new Date(task.updatedAt).toLocaleString(undefined, {
-            dateStyle: "medium",
-            timeStyle: "short",
-          })}
+          Completed {formatDateTimeDdMmYyyy(task.updatedAt)}
         </p>
       </div>
     </li>

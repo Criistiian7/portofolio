@@ -36,7 +36,11 @@ const getErrorMessage = (error: unknown) => {
   return "Authentication failed. Please try again.";
 };
 
-export default function Auth() {
+type Props = {
+  onLiveDemo?: () => void;
+};
+
+export default function Auth({ onLiveDemo }: Props) {
   const [mode, setMode] = useState<Mode>("sign-in");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -219,6 +223,21 @@ export default function Auth() {
               ? "Sign in"
               : "Create account"}
         </button>
+
+        {onLiveDemo ? (
+          <div className="mt-6 border-t border-white/10 pt-6">
+            <p className="text-center text-xs text-slate-400">
+              Want to explore first?
+            </p>
+            <button
+              type="button"
+              className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-white/15 bg-transparent px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-sky-400/40 hover:bg-white/5"
+              onClick={() => onLiveDemo()}
+            >
+              Live Demo
+            </button>
+          </div>
+        ) : null}
       </form>
     </div>
   );

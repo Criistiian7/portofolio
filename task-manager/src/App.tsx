@@ -2,11 +2,34 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { TaskProvider } from "./context/TaskProvider";
 import Auth from "./components/Auth";
+import DemoApp from "./components/DemoApp";
 import DashboardView from "./components/dashboard/DashboardView";
 import AppShell from "./components/layout/AppShell";
 import { auth, firebaseConfigError, firebaseProjectId } from "./firebase/config";
 import { useUserProfileSync } from "./hooks/useUserProfileSync";
 import { acceptInvite, hasPendingInvitesForUserEmail } from "./lib/invites";
+
+const LIVE_DEMO_SESSION_KEY = "task-manager-live-demo";
+
+function readLiveDemoSession(): boolean {
+  try {
+    return sessionStorage.getItem(LIVE_DEMO_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function persistLiveDemoSession(active: boolean) {
+  try {
+    if (active) {
+      sessionStorage.setItem(LIVE_DEMO_SESSION_KEY, "1");
+    } else {
+      sessionStorage.removeItem(LIVE_DEMO_SESSION_KEY);
+    }
+  } catch {
+    // ignore quota / private mode
+  }
+}
 
 function AuthenticatedApp({ user }: { user: User }) {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
@@ -85,6 +108,7 @@ function AuthenticatedApp({ user }: { user: User }) {
 }
 
 export default function App() {
+  const [liveDemo, setLiveDemo] = useState(readLiveDemoSession);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(() => auth === null);
 
@@ -100,6 +124,17 @@ export default function App() {
 
     return unsubscribe;
   }, []);
+
+  if (liveDemo) {
+    return (
+      <DemoApp
+        onExitDemo={() => {
+          persistLiveDemoSession(false);
+          setLiveDemo(false);
+        }}
+      />
+    );
+  }
 
   if (firebaseConfigError) {
     return (
@@ -156,7 +191,16 @@ export default function App() {
     );
   }
 
-  if (!user) return <Auth />;
+  if (!user) {
+    return (
+      <Auth
+        onLiveDemo={() => {
+          persistLiveDemoSession(true);
+          setLiveDemo(true);
+        }}
+      />
+    );
+  }
 
   return <AuthenticatedApp user={user} />;
 }

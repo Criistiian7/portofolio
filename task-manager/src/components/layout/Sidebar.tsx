@@ -6,6 +6,7 @@ import { createInvite } from "../../lib/invites";
 import { useContacts } from "../../hooks/useContacts";
 import { useInvites } from "../../hooks/useInvites";
 import { useProfileLabels } from "../../hooks/useProfileLabels";
+import { useDemoMode } from "../../context/DemoModeContext";
 import InvitesPanel from "./InvitesPanel";
 
 const NAV_LINKS: { label: string; project: string | null }[] = [
@@ -29,6 +30,7 @@ export default function Sidebar({
   projectFilter,
   onProjectFilterChange,
 }: Props) {
+  const demoMode = useDemoMode();
   const { addTask, isCreating } = useTasks();
   const contactUids = useContacts(userId);
   const { labelFor } = useProfileLabels(contactUids);
@@ -87,34 +89,43 @@ export default function Sidebar({
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300">
           Invite by email
         </p>
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-          <input
-            type="email"
-            value={inviteEmail}
-            onChange={(event) => setInviteEmail(event.target.value)}
-            placeholder="colleague@example.com"
-            className="w-full flex-1 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-sky-400"
-          />
-          <button
-            type="button"
-            disabled={invitePending}
-            onClick={() => void sendInvite()}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
-          >
-            <FaPaperPlane />
-            Send
-          </button>
-        </div>
-        {inviteMessage ? (
-          <p className="mt-3 text-sm text-slate-300">{inviteMessage}</p>
-        ) : null}
+        {demoMode.isDemo ? (
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            Invites are disabled in the live demo. Sign in to connect with
+            collaborators.
+          </p>
+        ) : (
+          <>
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+              <input
+                type="email"
+                value={inviteEmail}
+                onChange={(event) => setInviteEmail(event.target.value)}
+                placeholder="colleague@example.com"
+                className="w-full flex-1 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-sky-400"
+              />
+              <button
+                type="button"
+                disabled={invitePending}
+                onClick={() => void sendInvite()}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+              >
+                <FaPaperPlane />
+                Send
+              </button>
+            </div>
+            {inviteMessage ? (
+              <p className="mt-3 text-sm text-slate-300">{inviteMessage}</p>
+            ) : null}
 
-        <InvitesPanel
-          received={invites.received}
-          sent={invites.sent}
-          loading={invites.loading}
-          error={invites.error}
-        />
+            <InvitesPanel
+              received={invites.received}
+              sent={invites.sent}
+              loading={invites.loading}
+              error={invites.error}
+            />
+          </>
+        )}
       </div>
 
       <nav className="border-t border-white/10 pt-6">

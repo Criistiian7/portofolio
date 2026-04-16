@@ -17,6 +17,8 @@ type Props = {
   dark: boolean;
   onToggleTheme: () => void;
   onSignOut: () => void;
+  /** Live Demo: sample data banner and “Exit demo” in the top bar. */
+  isDemo?: boolean;
 };
 
 function applyFilters(
@@ -51,6 +53,7 @@ export default function DashboardView({
   dark,
   onToggleTheme,
   onSignOut,
+  isDemo = false,
 }: Props) {
   const { tasks, isLoading, error, refreshTasks } = useTasks();
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,12 +96,18 @@ export default function DashboardView({
 
   return (
     <div className="flex flex-col gap-8">
+      {isDemo ? (
+        <div className="rounded-2xl border border-sky-400/25 bg-sky-500/10 px-4 py-3 text-sm text-sky-100 shadow-lg shadow-slate-950/20 backdrop-blur">
+          You&apos;re viewing sample data — sign in to use your workspace.
+        </div>
+      ) : null}
       <TopNav
         user={user}
         workspaceTitle={workspaceTitle}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSignOut={onSignOut}
+        signOutLabel={isDemo ? "Exit demo" : "Sign out"}
       />
 
       {error ? (

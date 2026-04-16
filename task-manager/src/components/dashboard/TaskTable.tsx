@@ -1,28 +1,28 @@
 import { useState } from "react";
 import confetti from "canvas-confetti";
-import type { Task, TaskDraft, TaskStatus } from "../../types/Task";
+import { FaCheck, FaPen, FaTrash } from "react-icons/fa";
+import type { Task, TaskDraft } from "../../types/Task";
 import { isTaskDone } from "../../types/Task";
 import { auth } from "../../firebase/config";
 import { useTasks } from "../../context/useTasks";
 import TaskForm from "../TaskForm";
 import { useContacts } from "../../hooks/useContacts";
 import { useProfileLabels } from "../../hooks/useProfileLabels";
+import {
+  formatDateDdMmYyyy,
+  getEffectivePriorityDisplay,
+  type EffectivePriorityTier,
+} from "../../lib/dates";
 
 type Props = {
   tasks: Task[];
   userId: string;
 };
 
-const STATUS_LABEL: Record<TaskStatus, string> = {
-  todo: "To do",
-  in_progress: "In progress",
-  done: "Done",
-};
-
-const PRIORITY_LABEL: Record<Task["priority"], string> = {
-  high: "Critical",
-  medium: "Important",
-  low: "Normal",
+const PRIORITY_TIER_CLASS: Record<EffectivePriorityTier, string> = {
+  high: "bg-rose-500/15 text-rose-200",
+  medium: "bg-amber-500/15 text-amber-200",
+  low: "bg-emerald-500/15 text-emerald-200",
 };
 
 function AssigneeCell({ task }: { task: Task }) {
@@ -56,15 +56,14 @@ function AssigneeCell({ task }: { task: Task }) {
 }
 
 export default function TaskTable({ tasks, userId }: Props) {
-  const { deleteTask, toggleTask, updateTask, setTaskStatus, isTaskPending } =
-    useTasks();
+  const { deleteTask, toggleTask, updateTask, isTaskPending } = useTasks();
   const contactUids = useContacts(userId);
   const { labelFor } = useProfileLabels(contactUids);
 
   const [editing, setEditing] = useState<Task | null>(null);
 
   const activeRows = tasks.filter((task) => !isTaskDone(task));
-  const currentUid = auth?.currentUser?.uid ?? null;
+  const currentUid = auth?.currentUser?.uid ?? userId;
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-slate-950/20 backdrop-blur-xl">
@@ -107,6 +106,7 @@ export default function TaskTable({ tasks, userId }: Props) {
               activeRows.map((task) => {
                 const isOwner = task.ownerId === currentUid;
                 const isPending = isTaskPending(task.id);
+                const effectivePriority = getEffectivePriorityDisplay(task);
 
                 return (
                   <tr
@@ -114,25 +114,9 @@ export default function TaskTable({ tasks, userId }: Props) {
                     className="border-b border-white/5 bg-slate-950/20 hover:bg-slate-500/5"
                   >
                     <td className="px-px py-3 pr-4 pl-6 align-middle">
-                      <select
-                        value={task.status}
-                        disabled={isPending}
-                        onChange={(event) => {
-                          void setTaskStatus(
-                            task.id,
-                            event.target.value as TaskStatus,
-                          );
-                        }}
-                        className="w-full min-w-[8rem] rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2 text-xs text-white outline-none focus:border-sky-400 disabled:opacity-50"
-                      >
-                        {(Object.keys(STATUS_LABEL) as TaskStatus[]).map(
-                          (key) => (
-                            <option key={key} value={key}>
-                              {STATUS_LABEL[key]}
-                            </option>
-                          ),
-                        )}
-                      </select>
+                      <span className="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-200">
+                        In progress
+                      </span>
                     </td>
                     <td className="px-px py-3 pr-4 align-middle">
                       <div className="font-medium text-white">{task.text}</div>
@@ -147,52 +131,49 @@ export default function TaskTable({ tasks, userId }: Props) {
                     </td>
                     <td className="px-px py-3 pr-4 align-middle">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${task.priority === "high"
-                            ? "bg-rose-500/15 text-rose-200"
-                            : task.priority === "medium"
-                              ? "bg-amber-500/15 text-amber-200"
-                              : "bg-emerald-500/15 text-emerald-200"
-                          }`}
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${PRIORITY_TIER_CLASS[effectivePriority.tier]}`}
                       >
-                        {PRIORITY_LABEL[task.priority]}
+                        {effectivePriority.label}
                       </span>
                     </td>
                     <td className="px-px py-3 pr-4 align-middle text-slate-300">
-                      {task.dueDate
-                        ? new Date(
-                          `${task.dueDate}T12:00:00`,
-                        ).toLocaleDateString()
-                        : "—"}
+                      {formatDateDdMmYyyy(task.dueDate)}
                     </td>
                     <td className="px-px py-3 pr-4 align-middle">
                       <AssigneeCell task={task} />
                     </td>
                     <td className="px-px py-3 pr-6 align-middle">
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <button
                           type="button"
                           disabled={isPending}
+                          title="Mark complete"
+                          aria-label="Mark complete"
                           onClick={() => {
                             void toggleTask(task.id).then(() => {
                               confetti({ particleCount: 40, spread: 60 });
                             });
                           }}
-                          className="rounded-xl bg-emerald-500/90 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/35 bg-emerald-500/10 text-emerald-300 transition hover:border-emerald-400/50 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                          Complete
+                          <FaCheck className="text-base" aria-hidden />
                         </button>
                         <button
                           type="button"
                           disabled={isPending}
+                          title="Edit task"
+                          aria-label="Edit task"
                           onClick={() => setEditing(task)}
-                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-slate-500 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-500/30 bg-sky-500/10 text-sky-300 transition hover:border-sky-400/45 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                          Edit
+                          <FaPen className="text-sm" aria-hidden />
                         </button>
                         {isOwner ? (
                           <button
                             type="button"
                             disabled={isPending}
+                            title="Delete task"
+                            aria-label="Delete task"
                             onClick={async () => {
                               if (
                                 !window.confirm("Delete this task permanently?")
@@ -205,9 +186,9 @@ export default function TaskTable({ tasks, userId }: Props) {
                                 return;
                               }
                             }}
-                            className="rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-100 transition hover:border-rose-400/40 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-500/35 bg-rose-500/10 text-rose-300 transition hover:border-rose-400/50 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            Delete
+                            <FaTrash className="text-sm" aria-hidden />
                           </button>
                         ) : null}
                       </div>

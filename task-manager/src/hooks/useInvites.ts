@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { normalizeEmail } from "../lib/invites";
+import { useDemoMode } from "../context/DemoModeContext";
 
 export type InviteStatus = "pending" | "accepted" | "declined";
 
@@ -62,6 +63,7 @@ function mapInviteDoc(id: string, raw: Record<string, unknown>): InviteRow | nul
  * Live lists of invites the user sent or received (Firestore read rules apply).
  */
 export function useInvites(userEmail: string | null | undefined, userId: string) {
+  const demoMode = useDemoMode();
   const normalizedEmail = useMemo(
     () => (userEmail?.trim() ? normalizeEmail(userEmail) : null),
     [userEmail],
@@ -73,6 +75,14 @@ export function useInvites(userEmail: string | null | undefined, userId: string)
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (demoMode.isDemo) {
+      setReceived([]);
+      setSent([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     if (!db || !normalizedEmail || !userId) {
       setReceived([]);
       setSent([]);
@@ -137,7 +147,7 @@ export function useInvites(userEmail: string | null | undefined, userId: string)
       unsubReceived();
       unsubSent();
     };
-  }, [normalizedEmail, userId]);
+  }, [demoMode, normalizedEmail, userId]);
 
   return { received, sent, loading, error };
 }

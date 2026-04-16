@@ -9,7 +9,6 @@ type Props = {
 
 const TABS: { id: StatusTab; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "todo", label: "To do" },
   { id: "in_progress", label: "In progress" },
   { id: "done", label: "Done" },
 ];
