@@ -1,58 +1,33 @@
-import { useState } from "react";
-import { useTasks } from "../context/TaskContext";
+import { useTasks } from "../context/useTasks";
+import TaskForm from "./TaskForm";
 
 export default function TaskInput() {
-  const { addTask } = useTasks();
-
-  const [text, setText] = useState("");
-  const [desc, setDesc] = useState("");
-  const [category, setCategory] = useState("Work");
-  const [priority, setPriority] = useState("medium");
-
-  const submit = () => {
-    if (!text.trim()) return;
-
-    addTask({
-      text,
-      completed: false,
-      category,
-      priority,
-      tags: [desc],
-    });
-
-    setText("");
-    setDesc("");
-  };
+  const { addTask, isCreating } = useTasks();
 
   return (
-    <div className="task-input">
-      <input
-        placeholder="Task name..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-
-      <input
-        placeholder="Description..."
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-      />
-
-      <div className="row">
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option>Work</option>
-          <option>Personal</option>
-          <option>Other</option>
-        </select>
-
-        <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
+    <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-slate-950/20 backdrop-blur-xl">
+      <div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-300">
+            Create task
+          </p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+            Add something worth shipping
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            New tasks are created for the signed-in account with ownership,
+            timestamps, and consistent priority metadata.
+          </p>
+        </div>
       </div>
 
-      <button onClick={submit}>Add Task</button>
-    </div>
+      <div className="mt-6">
+        <TaskForm
+          submitLabel="Add task"
+          onSubmit={addTask}
+          disabled={isCreating}
+        />
+      </div>
+    </aside>
   );
 }

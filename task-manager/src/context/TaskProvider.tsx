@@ -1,0 +1,47 @@
+import { useEffect, type ReactNode } from "react";
+import { useTasksLogic } from "../hooks/useTasksLogic";
+import { TaskContext } from "./taskContext";
+
+export const TaskProvider = ({
+  children,
+  userId,
+}: {
+  children: ReactNode;
+  userId: string;
+}) => {
+  const {
+    tasks,
+    isLoading,
+    error,
+    isCreating,
+    refreshTasks,
+    addTask,
+    updateTask,
+    deleteTask,
+    toggleTask,
+    pendingTaskIds,
+  } = useTasksLogic(userId);
+
+  useEffect(() => {
+    void refreshTasks();
+  }, [refreshTasks]);
+
+  return (
+    <TaskContext.Provider
+      value={{
+        tasks,
+        isLoading,
+        error,
+        isCreating,
+        refreshTasks,
+        addTask,
+        updateTask,
+        deleteTask,
+        toggleTask,
+        isTaskPending: (id: string) => pendingTaskIds.includes(id),
+      }}
+    >
+      {children}
+    </TaskContext.Provider>
+  );
+};
