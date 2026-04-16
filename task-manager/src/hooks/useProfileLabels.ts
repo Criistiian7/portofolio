@@ -15,6 +15,8 @@ export function useProfileLabels(uids: string[]) {
       return;
     }
 
+    const firestore = db;
+
     let cancelled = false;
 
     void (async () => {
@@ -22,7 +24,7 @@ export function useProfileLabels(uids: string[]) {
       const entries = await Promise.all(
         unique.map(async (uid) => {
           try {
-            const snap = await getDoc(doc(db, "users", uid));
+            const snap = await getDoc(doc(firestore, "users", uid));
             const name = snap.data()?.displayName;
             const label =
               typeof name === "string" && name.trim() ? name.trim() : uid;
