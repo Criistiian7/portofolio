@@ -196,7 +196,6 @@ export default function TypingBox({
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (isFinished || isLoading) return;
     const now = Date.now();
-    const nextStart = startMs ?? now;
 
     if (!startMs) setStartMs(now);
 
