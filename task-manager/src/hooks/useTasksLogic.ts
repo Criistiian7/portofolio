@@ -1,12 +1,12 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FirebaseError } from "firebase/app";
 import { auth, db, firebaseConfigError } from "../firebase/config";
 import {
   addDoc,
   deleteDoc,
   getDoc,
-  getDocs,
   collection,
+  onSnapshot,
   updateDoc,
   doc,
   query,
@@ -181,6 +181,19 @@ export const useTasksLogic = (userId: string) => {
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [pendingTaskIds, setPendingTaskIds] = useState<string[]>([]);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const queryDataRef = useRef<Record<"owner" | "assignee" | "participant", Map<string, Task>>>({
+    owner: new Map(),
+    assignee: new Map(),
+    participant: new Map(),
+  });
+  const queryStatusRef = useRef<
+    Record<"owner" | "assignee" | "participant", { ready: boolean; error: unknown | null }>
+  >({
+    owner: { ready: false, error: null },
+    assignee: { ready: false, error: null },
+    participant: { ready: false, error: null },
+  });
 
   const setTaskPending = (taskId: string, isPending: boolean) => {
     setPendingTaskIds((current) => {
@@ -192,110 +205,132 @@ export const useTasksLogic = (userId: string) => {
     });
   };
 
-  const fetchTasks = useCallback(
-    async (showLoading = true) => {
-      if (showLoading) {
-        setIsLoading(true);
+  useEffect(() => {
+    setIsLoading(true);
+    setError(null);
+
+    queryDataRef.current = {
+      owner: new Map(),
+      assignee: new Map(),
+      participant: new Map(),
+    };
+    queryStatusRef.current = {
+      owner: { ready: false, error: null },
+      assignee: { ready: false, error: null },
+      participant: { ready: false, error: null },
+    };
+
+    if (!db) {
+      setError(
+        firebaseConfigError ??
+          "Firebase is not configured. Add your Vite env vars and retry.",
+      );
+      setIsLoading(false);
+      setTasks([]);
+      return;
+    }
+
+    const emitMergedTasks = () => {
+      const byId = new Map<string, Task>();
+      for (const source of ["owner", "assignee", "participant"] as const) {
+        for (const [id, task] of queryDataRef.current[source]) {
+          byId.set(id, task);
+        }
       }
 
-      setError(null);
+      const data = Array.from(byId.values()).sort((first, second) =>
+        second.createdAt.localeCompare(first.createdAt),
+      );
+      setTasks(data);
+    };
 
-      if (!db) {
-        setError(
-          firebaseConfigError ??
-            "Firebase is not configured. Add your Vite env vars and retry.",
-        );
-        if (showLoading) {
-          setIsLoading(false);
-        }
+    const updateQueryState = (
+      key: "owner" | "assignee" | "participant",
+      nextTasks: Map<string, Task> | null,
+      nextError: unknown | null,
+    ) => {
+      if (nextTasks) {
+        queryDataRef.current[key] = nextTasks;
+      }
+
+      queryStatusRef.current[key] = {
+        ready: true,
+        error: nextError,
+      };
+
+      emitMergedTasks();
+
+      const statuses = Object.values(queryStatusRef.current);
+      const allReady = statuses.every((status) => status.ready);
+      const firstError = statuses.find((status) => status.error)?.error ?? null;
+      const loadedAny = statuses.some((status) => status.ready && !status.error);
+
+      if (allReady) {
+        setIsLoading(false);
+      }
+
+      if (!allReady && !loadedAny && firstError) {
         return;
       }
 
-      try {
-        // Load tasks by ownerId and assigneeUid — these equality queries align cleanly
-        // with Firestore security rules (isParticipant). Avoid relying on
-        // participantIds array-contains as the primary path: some projects see
-        // permission-denied on that query even when rules look correct.
-        // Optional third query catches extra participantIds (e.g. legacy data); ignored if it fails.
-        const [ownerResult, assigneeResult, participantArrayResult] =
-          await Promise.allSettled([
-            getDocs(
-              query(collection(db, "tasks"), where("ownerId", "==", userId)),
-            ),
-            getDocs(
-              query(
-                collection(db, "tasks"),
-                where("assigneeUid", "==", userId),
-              ),
-            ),
-            getDocs(
-              query(
-                collection(db, "tasks"),
-                where("participantIds", "array-contains", userId),
-              ),
-            ),
-          ]);
+      if (loadedAny) {
+        setError(null);
+        return;
+      }
 
-        const byId = new Map<string, Task>();
-
-        for (const result of [
-          ownerResult,
-          assigneeResult,
-          participantArrayResult,
-        ]) {
-          if (result.status !== "fulfilled") {
-            continue;
-          }
-          for (const docSnap of result.value.docs) {
-            const parsed = toTask(docSnap.id, docSnap.data() as TaskFormState);
-            if (parsed) {
-              byId.set(parsed.id, parsed);
-            }
-          }
-        }
-
-        const loadedAny =
-          ownerResult.status === "fulfilled" ||
-          assigneeResult.status === "fulfilled" ||
-          participantArrayResult.status === "fulfilled";
-
-        if (!loadedAny) {
-          const firstError =
-            ownerResult.status === "rejected"
-              ? ownerResult.reason
-              : assigneeResult.status === "rejected"
-                ? assigneeResult.reason
-                : participantArrayResult.reason;
-          setError(
-            getErrorMessage(
-              firstError,
-              "We could not load tasks. Check your Firebase configuration and try again.",
-            ),
-          );
-        } else {
-          setError(null);
-        }
-
-        const data = Array.from(byId.values()).sort((first, second) =>
-          second.createdAt.localeCompare(first.createdAt),
-        );
-
-        setTasks(data);
-      } catch (fetchError) {
+      if (firstError) {
         setError(
           getErrorMessage(
-            fetchError,
+            firstError,
             "We could not load tasks. Check your Firebase configuration and try again.",
           ),
         );
-      } finally {
-        if (showLoading) {
-          setIsLoading(false);
-        }
       }
-    },
-    [userId],
-  );
+    };
+
+    const subscribeToQuery = (
+      key: "owner" | "assignee" | "participant",
+      q: ReturnType<typeof query>,
+    ) =>
+      onSnapshot(
+        q,
+        (snapshot) => {
+          const next = new Map<string, Task>();
+          for (const docSnap of snapshot.docs) {
+            const parsed = toTask(docSnap.id, docSnap.data() as TaskFormState);
+            if (parsed) {
+              next.set(parsed.id, parsed);
+            }
+          }
+
+          updateQueryState(key, next, null);
+        },
+        (snapshotError) => {
+          updateQueryState(key, new Map(), snapshotError);
+        },
+      );
+
+    // Keep owner and assignee views live. The third listener catches any older
+    // participantIds-only records and cross-user updates without requiring refresh.
+    const unsubOwner = subscribeToQuery(
+      "owner",
+      query(collection(db, "tasks"), where("ownerId", "==", userId)),
+    );
+    const unsubAssignee = subscribeToQuery(
+      "assignee",
+      query(collection(db, "tasks"), where("assigneeUid", "==", userId)),
+    );
+    const unsubParticipant = subscribeToQuery(
+      "participant",
+      query(collection(db, "tasks"), where("participantIds", "array-contains", userId)),
+    );
+
+    return () => {
+      unsubOwner();
+      unsubAssignee();
+      unsubParticipant();
+    };
+  }, [refreshNonce, userId]);
 
   const addTask = async (task: TaskDraft) => {
     if (!db) {
@@ -340,7 +375,6 @@ export const useTasksLogic = (userId: string) => {
         createdAt: now,
         updatedAt: now,
       });
-      await fetchTasks(false);
     } catch (createError) {
       setError(
         getErrorMessage(
@@ -392,7 +426,6 @@ export const useTasksLogic = (userId: string) => {
         assigneePhotoURL: denorm.assigneePhotoURL,
         updatedAt: new Date().toISOString(),
       });
-      await fetchTasks(false);
     } catch (updateError) {
       setError(
         getErrorMessage(
@@ -420,7 +453,6 @@ export const useTasksLogic = (userId: string) => {
 
     try {
       await deleteDoc(doc(db, "tasks", id));
-      await fetchTasks(false);
     } catch (deleteError) {
       setError(
         getErrorMessage(
@@ -457,7 +489,6 @@ export const useTasksLogic = (userId: string) => {
         participantIds: normalizeParticipantIds(task.ownerId, task.assigneeUid),
         updatedAt: new Date().toISOString(),
       });
-      await fetchTasks(false);
     } catch (toggleError) {
       setError(
         getErrorMessage(
@@ -492,7 +523,6 @@ export const useTasksLogic = (userId: string) => {
         participantIds: normalizeParticipantIds(task.ownerId, task.assigneeUid),
         updatedAt: new Date().toISOString(),
       });
-      await fetchTasks(false);
     } catch (err) {
       setError(
         getErrorMessage(err, "We could not update that task. Please retry in a moment."),
@@ -504,8 +534,8 @@ export const useTasksLogic = (userId: string) => {
   };
 
   const refreshTasks = useCallback(async () => {
-    await fetchTasks(true);
-  }, [fetchTasks]);
+    setRefreshNonce((current) => current + 1);
+  }, []);
 
   return {
     tasks,

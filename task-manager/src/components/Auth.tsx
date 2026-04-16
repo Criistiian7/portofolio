@@ -115,8 +115,7 @@ export default function Auth({ onLiveDemo }: Props) {
           {mode === "sign-in" ? "Welcome back" : "Create your workspace"}
         </h2>
         <p className="mt-4 text-sm leading-6 text-slate-300">
-          Sign in with Firebase Authentication to access your task workspace.
-          Each account is isolated by authenticated ownership in Firestore.
+          Sign in to access your task workspace.
         </p>
 
         <div className="mt-8 inline-flex rounded-2xl border border-white/10 bg-slate-900/70 p-1 text-sm text-slate-300">

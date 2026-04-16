@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useDemoMode } from "../context/DemoModeContext";
 
@@ -26,35 +26,31 @@ export function useProfileLabels(uids: string[]) {
       return;
     }
 
-    const firestore = db;
+    const unique = Array.from(new Set(uids));
+    const nextLabels: Record<string, string> = Object.fromEntries(
+      unique.map((uid) => [uid, uid]),
+    );
 
-    let cancelled = false;
+    setLabels(nextLabels);
 
-    void (async () => {
-      const unique = Array.from(new Set(uids));
-      const entries = await Promise.all(
-        unique.map(async (uid) => {
-          try {
-            const snap = await getDoc(doc(firestore, "users", uid));
-            const name = snap.data()?.displayName;
-            const label =
-              typeof name === "string" && name.trim() ? name.trim() : uid;
-            return [uid, label] as const;
-          } catch {
-            return [uid, uid] as const;
-          }
-        }),
-      );
-
-      if (cancelled) {
-        return;
-      }
-
-      setLabels(Object.fromEntries(entries));
-    })();
+    const unsubs = unique.map((uid) =>
+      onSnapshot(
+        doc(db, "users", uid),
+        (snap) => {
+          const name = snap.data()?.displayName;
+          const label = typeof name === "string" && name.trim() ? name.trim() : uid;
+          setLabels((current) => ({ ...current, [uid]: label }));
+        },
+        () => {
+          setLabels((current) => ({ ...current, [uid]: uid }));
+        },
+      ),
+    );
 
     return () => {
-      cancelled = true;
+      for (const unsub of unsubs) {
+        unsub();
+      }
     };
   }, [uidKey, demoMode]);
 

@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useTasksLogic } from "../hooks/useTasksLogic";
 import { TaskContext } from "./taskContext";
 
@@ -22,10 +22,6 @@ export const TaskProvider = ({
     setTaskStatus,
     pendingTaskIds,
   } = useTasksLogic(userId);
-
-  useEffect(() => {
-    void refreshTasks();
-  }, [refreshTasks]);
 
   return (
     <TaskContext.Provider
