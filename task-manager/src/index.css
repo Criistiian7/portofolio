@@ -185,3 +185,39 @@ select {
 .task-item.high {
   border-left: 4px solid #ef4444;
 }
+
+.bulk {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+.task-item input[type="checkbox"] {
+  margin-right: 10px;
+  transform: scale(1.2);
+}
+
+select {
+  appearance: none;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: white;
+}
+
+.task-item.low {
+  border-left: 5px solid #22c55e;
+}
+
+.task-item.medium {
+  border-left: 5px solid #f59e0b;
+}
+
+.task-item.high {
+  border-left: 5px solid #ef4444;
+}

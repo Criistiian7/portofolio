@@ -4,6 +4,7 @@ import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
 import SearchBar from "./components/SearchBar";
 import Auth from "./components/Auth";
+import BulkActions from "./components/BulkActions";
 
 export default function App() {
   const [user, setUser] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export default function App() {
 
         <SearchBar setSearch={setSearch} />
         <TaskInput />
+        <BulkActions />
         <TaskList search={search} />
       </div>
     </TaskProvider>

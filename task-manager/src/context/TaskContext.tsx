@@ -7,6 +7,10 @@ type ContextType = {
   addTask: (task: Omit<Task, "id">) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
+  editTask: (id: string, text: string) => void;
+  toggleSelect: (id: string) => void;
+  selectAll: () => void;
+  deleteSelected: () => void;
 };
 
 const TaskContext = createContext<ContextType | null>(null);
@@ -29,7 +33,10 @@ export const TaskProvider = ({ children }: any) => {
   }, [tasks]);
 
   const addTask = (task: Omit<Task, "id">) => {
-    setTasks([...tasks, { ...task, id: Date.now().toString() }]);
+    setTasks([
+      ...tasks,
+      { ...task, id: Date.now().toString(), selected: false },
+    ]);
   };
 
   const toggleTask = (id: string) => {
@@ -42,8 +49,37 @@ export const TaskProvider = ({ children }: any) => {
     setTasks(tasks.filter((t) => t.id !== id));
   };
 
+  const editTask = (id: string, text: string) => {
+    setTasks(tasks.map((t) => (t.id === id ? { ...t, text } : t)));
+  };
+
+  const toggleSelect = (id: string) => {
+    setTasks(
+      tasks.map((t) => (t.id === id ? { ...t, selected: !t.selected } : t)),
+    );
+  };
+
+  const selectAll = () => {
+    setTasks(tasks.map((t) => ({ ...t, selected: true })));
+  };
+
+  const deleteSelected = () => {
+    setTasks(tasks.filter((t) => !t.selected));
+  };
+
   return (
-    <TaskContext.Provider value={{ tasks, addTask, toggleTask, deleteTask }}>
+    <TaskContext.Provider
+      value={{
+        tasks,
+        addTask,
+        toggleTask,
+        deleteTask,
+        editTask,
+        toggleSelect,
+        selectAll,
+        deleteSelected,
+      }}
+    >
       {children}
     </TaskContext.Provider>
   );

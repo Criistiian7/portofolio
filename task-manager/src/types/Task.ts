@@ -5,4 +5,5 @@ export type Task = {
   category: string;
   tags: string[];
   priority: "low" | "medium" | "high";
+  selected?: boolean;
 };

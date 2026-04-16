@@ -1,26 +1,51 @@
+import { useState } from "react";
+import confetti from "canvas-confetti";
 import type { Task } from "../types/Task";
 import { useTasks } from "../context/TaskContext";
 
 export default function TaskItem({ task }: { task: Task }) {
-  const { toggleTask, deleteTask } = useTasks();
+  const { toggleTask, deleteTask, editTask, toggleSelect } = useTasks();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(task.text);
+
+  const handleComplete = () => {
+    toggleTask(task.id);
+
+    if (!task.completed) {
+      confetti();
+    }
+  };
+
+  const save = () => {
+    editTask(task.id, value);
+    setEditing(false);
+  };
 
   return (
     <div className={`task-item ${task.priority}`}>
-      <div>
-        <span onClick={() => toggleTask(task.id)}>{task.text}</span>
+      <input
+        type="checkbox"
+        checked={task.selected || false}
+        onChange={() => toggleSelect(task.id)}
+      />
 
-        <div className="meta">
-          {task.category} • {task.priority}
-        </div>
+      {editing ? (
+        <input value={value} onChange={(e) => setValue(e.target.value)} />
+      ) : (
+        <span onClick={handleComplete} className={task.completed ? "done" : ""}>
+          {task.text}
+        </span>
+      )}
 
-        <div className="tags">
-          {task.tags.map((t, i) => (
-            <span key={i}>#{t}</span>
-          ))}
-        </div>
+      <div className="actions">
+        {editing ? (
+          <button onClick={save}>✔</button>
+        ) : (
+          <button onClick={() => setEditing(true)}>✏</button>
+        )}
+
+        <button onClick={() => deleteTask(task.id)}>🗑</button>
       </div>
-
-      <button onClick={() => deleteTask(task.id)}>✕</button>
     </div>
   );
 }
