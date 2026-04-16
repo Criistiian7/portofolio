@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+task-manager/node_modules/
+task-manager/dist/
+task-manager/.env.local
+task-manager/.vite/
+
+typing-speed-app-react/node_modules/
+typing-speed-app-react/dist/
