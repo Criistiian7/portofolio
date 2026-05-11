@@ -1,0 +1,17 @@
+{
+  "name": "real-time-system-monitoring",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "echo Run 'npm run dev:server' and 'npm run dev:web' in two terminals.",
+    "dev:server": "npm run dev -w server",
+    "dev:web": "npm run dev -w web",
+    "build": "npm run build -w server && npm run build -w web",
+    "test": "npm run test -w server"
+  }
+}
