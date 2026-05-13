@@ -2,10 +2,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { signInEmail } from "@/services/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { paths } from "@/lib/paths";
+import { PRODUCT_NAME } from "@/brand/constants";
+import { DocumentTitle } from "@/components/system/DocumentTitle";
 import { FullPageSkeleton } from "@/components/system/FullPageSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,10 +48,12 @@ export default function LoginPage() {
   });
 
   return (
-    <Card>
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
+      <DocumentTitle title={`Sign in — ${PRODUCT_NAME}`} />
+      <Card className="border-0 bg-transparent shadow-none">
       <CardHeader>
-        <CardTitle className="font-display text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to your workspace.</CardDescription>
+        <CardTitle className="font-display text-2xl">Welcome to {PRODUCT_NAME}</CardTitle>
+        <CardDescription>Sign in to your workspace—mock mode works without Firebase keys.</CardDescription>
       </CardHeader>
       <form onSubmit={onSubmit}>
         <CardContent className="grid gap-4">
@@ -82,5 +87,6 @@ export default function LoginPage() {
         </CardFooter>
       </form>
     </Card>
+    </motion.div>
   );
 }

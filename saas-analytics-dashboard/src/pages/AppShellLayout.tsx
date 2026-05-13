@@ -2,6 +2,9 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Outlet, useLocation } from "react-router-dom";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppTopbar } from "@/components/layout/AppTopbar";
+import { OnboardingModal } from "@/components/system/OnboardingModal";
+import { ShortcutsDialog } from "@/components/system/ShortcutsDialog";
+import { PRODUCT_NAME } from "@/brand/constants";
 
 export default function AppShellLayout() {
   const location = useLocation();
@@ -9,6 +12,8 @@ export default function AppShellLayout() {
 
   return (
     <div className="flex min-h-dvh w-full">
+      <OnboardingModal />
+      <ShortcutsDialog />
       <div className="hidden shrink-0 md:flex md:h-dvh">
         <AppSidebar />
       </div>
@@ -31,6 +36,7 @@ export default function AppShellLayout() {
           </div>
           <footer className="shrink-0 border-t border-border bg-background/80 px-4 py-3 text-center text-xs text-muted-foreground backdrop-blur">
             <span className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+              <span className="font-medium text-foreground/80">{PRODUCT_NAME}</span>
               <a className="underline underline-offset-4 hover:text-foreground" href="#" aria-label="Privacy (placeholder)">
                 Privacy
               </a>

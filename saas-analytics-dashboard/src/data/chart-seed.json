@@ -23,5 +23,22 @@
     { "label": "Q2", "value": 92 },
     { "label": "Q3", "value": 95 },
     { "label": "Q4", "value": 97 }
+  ],
+  "funnelBars": [
+    { "label": "Visitors", "value": 100 },
+    { "label": "Signups", "value": 38 },
+    { "label": "Activated", "value": 22 },
+    { "label": "Paid", "value": 12 }
+  ],
+  "geoBars": [
+    { "label": "EU", "value": 42 },
+    { "label": "North America", "value": 31 },
+    { "label": "APAC", "value": 18 },
+    { "label": "LATAM", "value": 9 }
+  ],
+  "devicePie": [
+    { "name": "Web", "value": 58 },
+    { "name": "Mobile", "value": 35 },
+    { "name": "API", "value": 7 }
   ]
 }

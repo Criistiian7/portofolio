@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Download, MoreHorizontal } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +25,8 @@ import {
 } from "@/components/ui/dialog";
 
 export default function UsersPage() {
+  const { pathname } = useLocation();
+  const teamMode = pathname.startsWith("/app/team");
   const { user } = useAuth();
   const q = useOrgUsersQuery(user?.uid);
   const globalSearch = useUiStore((s) => s.globalSearch);
@@ -90,8 +93,12 @@ export default function UsersPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Users</h1>
-        <p className="text-sm text-muted-foreground">Directory rows stored in `orgUsers` with `ownerId`.</p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">{teamMode ? "Team" : "Customers"}</h1>
+        <p className="text-sm text-muted-foreground">
+          {teamMode
+            ? "Org directory for invites and roles—same `orgUsers` collection, operator-focused framing."
+            : "Customer directory rows stored in `orgUsers` with `ownerId` scoping."}
+        </p>
       </div>
       <DataTable
         data={rows}
@@ -107,7 +114,7 @@ export default function UsersPage() {
                 { key: "email", header: "Email" },
                 { key: "role", header: "Role" },
                 { key: "status", header: "Status" },
-              ], "users.csv")
+              ], teamMode ? "team.csv" : "customers.csv")
             }
           >
             <Download className="mr-2 h-4 w-4" />

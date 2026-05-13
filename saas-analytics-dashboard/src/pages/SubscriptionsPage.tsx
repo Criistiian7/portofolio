@@ -6,6 +6,8 @@ import { DataTable } from "@/components/tables/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DocumentTitle } from "@/components/system/DocumentTitle";
+import { PRODUCT_NAME } from "@/brand/constants";
 
 export default function SubscriptionsPage() {
   const { user } = useAuth();
@@ -43,6 +45,7 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="space-y-4">
+      <DocumentTitle title={`Subscriptions — ${PRODUCT_NAME}`} />
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Subscriptions</h1>
         <p className="text-sm text-muted-foreground">Summary cards plus detail table.</p>

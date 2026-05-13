@@ -103,4 +103,7 @@ export interface ChartSeed {
   channelBars: ChartPoint[];
   planPie: { name: string; value: number }[];
   cohortBars: ChartPoint[];
+  funnelBars: ChartPoint[];
+  geoBars: ChartPoint[];
+  devicePie: { name: string; value: number }[];
 }

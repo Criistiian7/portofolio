@@ -2,6 +2,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo } from "react";
+import { KanbanSquare } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -24,6 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/system/EmptyState";
+import { DocumentTitle } from "@/components/system/DocumentTitle";
+import { PRODUCT_NAME } from "@/brand/constants";
 
 const schema = z.object({
   title: z.string().min(2),
@@ -61,6 +65,7 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-4">
+      <DocumentTitle title={`Tasks — ${PRODUCT_NAME}`} />
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Tasks</h1>
         <p className="text-sm text-muted-foreground">List + Kanban share the same Firestore collection.</p>
@@ -135,7 +140,11 @@ export default function TasksPage() {
             {tasks.isLoading ? (
               <p className="text-sm text-muted-foreground">Loading…</p>
             ) : list.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No tasks yet.</p>
+              <EmptyState
+                icon={KanbanSquare}
+                title="No tasks yet"
+                description="Create your first task above, or switch to the board tab once cards exist."
+              />
             ) : (
               list.map((t) => (
                 <div key={t.id} className="flex items-center justify-between rounded-lg border border-border p-3">

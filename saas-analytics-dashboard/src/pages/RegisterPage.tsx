@@ -2,10 +2,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { registerEmail } from "@/services/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { paths } from "@/lib/paths";
+import { PRODUCT_NAME } from "@/brand/constants";
+import { DocumentTitle } from "@/components/system/DocumentTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,10 +51,12 @@ export default function RegisterPage() {
   });
 
   return (
-    <Card>
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
+      <DocumentTitle title={`Create account — ${PRODUCT_NAME}`} />
+      <Card className="border-0 bg-transparent shadow-none">
       <CardHeader>
-        <CardTitle className="font-display text-2xl">Create your account</CardTitle>
-        <CardDescription>Start with email and a strong password.</CardDescription>
+        <CardTitle className="font-display text-2xl">Join {PRODUCT_NAME}</CardTitle>
+        <CardDescription>Start with email and a strong password—Firebase or mock.</CardDescription>
       </CardHeader>
       <form onSubmit={onSubmit}>
         <CardContent className="grid gap-4">
@@ -90,5 +95,6 @@ export default function RegisterPage() {
         </CardFooter>
       </form>
     </Card>
+    </motion.div>
   );
 }

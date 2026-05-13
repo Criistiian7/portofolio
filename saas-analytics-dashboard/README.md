@@ -1,6 +1,32 @@
-# SaaS Analytics Dashboard
+# MetricFlow (saas-analytics-dashboard)
 
-Production-style portfolio app: Vite + React + TypeScript, Firebase Auth + Firestore, TanStack Query, Zustand (UI shell only), React Router v6 with lazy routes, Radix primitives, Tailwind design tokens, Recharts, TanStack Table, and `@dnd-kit` for Kanban moves.
+**MetricFlow** is the product-facing name for this portfolio app: Vite + React + TypeScript, Firebase Auth + Firestore, TanStack Query, Zustand, React Router v6 with lazy routes, Radix primitives, Tailwind design tokens (glass + glow), Recharts, TanStack Table, Framer Motion, and `@dnd-kit` for Kanban moves. The repository folder remains `saas-analytics-dashboard`; branding is application-level only.
+
+## Public vs authenticated routing
+
+| URL | Who | Behavior |
+| --- | --- | --- |
+| `/` | Anonymous | Marketing **landing** (MetricFlow hero, FAQ, CTAs). |
+| `/` | Signed in | **Redirect to `/app/overview`** so the dashboard stays the primary authenticated entry. |
+| `/pricing` | Anonymous | Pricing page inside the marketing shell. |
+| `/pricing` | Signed in | Same redirect as `/` (workspace-first). |
+| `/login`, `/register`, `/forgot-password` | Anonymous | Auth screens with split glass layout. |
+| `/app/*` | Signed in | Protected MetricFlow shell (sidebar + topbar). |
+| `/app/*` | Anonymous | Redirect to `/login` with `state.from` for post-login return. |
+
+## Route map (app shell)
+
+- `/app/overview` — Dashboard (KPIs, charts, live activity blend)
+- `/app/analytics` — Analytics (MRR line + funnel)
+- `/app/revenue` — Revenue rollups (subscriptions + sales + invoices + seed charts)
+- `/app/customers` & `/app/team` — Same `orgUsers` directory; copy differs (customers vs team)
+- `/app/subscriptions` — Plans table
+- `/app/reports`, `/app/insights` — Static / demo storytelling surfaces
+- `/app/notifications` — Inbox-style feed (synthetic + Firestore activity)
+- `/app/integrations` — Demo toggles persisted locally in the browser
+- **Operations:** `/app/tasks`, `/app/activity`, `/app/invoices`
+- `/app/settings` — Profile + preferences
+- **Legacy redirects:** `/app/users` → `/app/customers`, `/app/sales` → `/app/revenue`
 
 ## Environment / mock mode
 
@@ -35,8 +61,9 @@ Deploy [firestore.rules](firestore.rules). Commit [firestore.indexes.json](fires
 ## Architecture notes
 
 - **Server state:** TanStack Query + repository modules under `src/services/firestore/` and `src/services/auth.ts`. Keys live in `src/lib/queryKeys.ts`.
-- **Client UI state:** Zustand (`src/store/`) for sidebar, table density, theme, and ephemeral global search in the top bar.
-- **Charts:** Time series and categorical demos load from `src/data/chart-seed.json` to keep the UI fast; Firestore backs domain lists (`tasks`, `invoices`, `activity`, etc.).
+- **Client UI state:** Zustand (`src/store/`) for sidebar, table density, theme, command palette flag, and ephemeral global search in the top bar.
+- **Brand:** `src/brand/constants.ts` + `MetricFlowLogo`; `DocumentTitle` sets `document.title` per route.
+- **Charts:** Time series and categorical demos load from `src/data/chart-seed.json`; Firestore backs domain lists (`tasks`, `invoices`, `activity`, etc.).
 - **Auth:** `AuthContext` owns a single `onAuthStateChanged` subscription and bootstraps `users/{uid}` via `ensureUserProfile`.
 - **Errors:** Router `errorElement` handles route-level failures; `react-error-boundary` wraps the main outlet tree for render errors in descendants (different scope).
 
@@ -45,21 +72,22 @@ Deploy [firestore.rules](firestore.rules). Commit [firestore.indexes.json](fires
 Use this as a lightweight “done” checklist before calling the portfolio slice complete:
 
 | Phase | Checks |
-|-------|--------|
+| ----- | ------ |
 | **Foundation** | App loads without blank screen; theme toggles and persists; 404 route shows not-found UI. |
+| **Marketing** | Logged-out `/` shows landing (not instant redirect to login); CTAs reach `/register` and `/login`. |
 | **Auth** | Logged-out user hitting `/app/overview` is redirected to `/login`; after sign-in, redirect to app works; sign-out returns to login. |
 | **Data** | With mock mode, tables/charts show data; with Firebase, Firestore reads succeed for the signed-in user only. |
 | **Security** | Deployed rules deny reading another user’s `tasks` / `invoices` (different `ownerId`). `users/{uid}` only readable by that uid; **`role` cannot change** on profile update (see rules). |
-| **Tables** | Sort, filter, pagination behave; CSV export downloads a valid file for users/invoices. |
+| **Tables** | Sort, filter, pagination behave; CSV export downloads a valid file for customers/invoices. |
 | **Tasks** | Create task from list; move card on Kanban updates column after refresh (or optimistic UI + refetch). |
-| **Polish** | Skip link focuses main content; reduced-motion preference does not break layout. |
+| **Polish** | Skip link focuses main content; reduced-motion preference does not break layout; `⌘/Ctrl+K` opens shortcuts dialog. |
 
 ## Out of scope (v1 portfolio)
 
 - Email verification, MFA, OAuth providers.
 - App Check, server-side rate limits, anti-abuse on password reset.
 - Automated E2E tests (optional Vitest for pure utils only).
-- i18n, command palette.
+- i18n, real command palette search.
 - Offline mutation queue (TanStack Query retries only).
 
 For production hardening, add App Check, DPA/privacy links in the shell footer (see app footer placeholders), and move privileged `role` changes to Admin SDK / Cloud Functions.

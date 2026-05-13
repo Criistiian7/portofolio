@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { DocumentTitle } from "@/components/system/DocumentTitle";
+import { PRODUCT_NAME } from "@/brand/constants";
 import {
   Select,
   SelectContent,
@@ -39,6 +41,7 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <DocumentTitle title={`Settings — ${PRODUCT_NAME}`} />
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">Profile and workspace preferences.</p>

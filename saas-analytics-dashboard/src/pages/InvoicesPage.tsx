@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Download, MoreHorizontal } from "lucide-react";
+import { Download, MoreHorizontal, Receipt } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useInvoicesQuery } from "@/hooks/queries/useInvoicesQuery";
 import { useUiStore } from "@/store/uiStore";
@@ -22,6 +22,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DocumentTitle } from "@/components/system/DocumentTitle";
+import { EmptyState } from "@/components/system/EmptyState";
+import { PRODUCT_NAME } from "@/brand/constants";
 
 export default function InvoicesPage() {
   const { user } = useAuth();
@@ -96,34 +99,45 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-4">
+      <DocumentTitle title={`Invoices — ${PRODUCT_NAME}`} />
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Invoices</h1>
         <p className="text-sm text-muted-foreground">PDF download can swap in behind the same modal action.</p>
       </div>
-      <DataTable
-        data={rows}
-        columns={columns}
-        toolbar={
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              exportToCsv(rows, [
-                { key: "id", header: "ID" },
-                { key: "customer", header: "Customer" },
-                { key: "amount", header: "Amount" },
-                { key: "currency", header: "Currency" },
-                { key: "status", header: "Status" },
-                { key: "issuedAt", header: "IssuedAt" },
-              ], "invoices.csv")
-            }
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
-        }
-      />
+      {q.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading invoices…</p>
+      ) : rows.length === 0 ? (
+        <EmptyState
+          icon={Receipt}
+          title="No invoices yet"
+          description="Seed data in mock mode includes invoices—check Firebase rules if this table is empty in real mode."
+        />
+      ) : (
+        <DataTable
+          data={rows}
+          columns={columns}
+          toolbar={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                exportToCsv(rows, [
+                  { key: "id", header: "ID" },
+                  { key: "customer", header: "Customer" },
+                  { key: "amount", header: "Amount" },
+                  { key: "currency", header: "Currency" },
+                  { key: "status", header: "Status" },
+                  { key: "issuedAt", header: "IssuedAt" },
+                ], "invoices.csv")
+              }
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          }
+        />
+      )}
 
       <Dialog open={Boolean(selected)} onOpenChange={(o) => !o && setSelected(null)}>
         <DialogContent>

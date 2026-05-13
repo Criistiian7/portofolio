@@ -9,11 +9,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeBridge } from "@/components/system/ThemeBridge";
 import { FullPageSkeleton } from "@/components/system/FullPageSkeleton";
 import { ProtectedLayout } from "@/routes/ProtectedLayout";
-import IndexRedirect from "@/pages/IndexRedirect";
 import AuthLayout from "@/pages/AuthLayout";
 import AppShellLayout from "@/pages/AppShellLayout";
 import RouteErrorPage from "@/pages/RouteErrorPage";
 import NotFoundPage from "@/pages/NotFoundPage";
+import { paths } from "@/lib/paths";
+
+const MarketingLayout = lazy(() => import("@/pages/MarketingLayout"));
+const LandingPage = lazy(() => import("@/pages/marketing/LandingPage"));
+const PricingPage = lazy(() => import("@/pages/marketing/PricingPage"));
 
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
@@ -22,11 +26,15 @@ const OverviewPage = lazy(() => import("@/pages/OverviewPage"));
 const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage"));
 const UsersPage = lazy(() => import("@/pages/UsersPage"));
 const SubscriptionsPage = lazy(() => import("@/pages/SubscriptionsPage"));
-const SalesPage = lazy(() => import("@/pages/SalesPage"));
 const InvoicesPage = lazy(() => import("@/pages/InvoicesPage"));
 const TasksPage = lazy(() => import("@/pages/TasksPage"));
 const ActivityPage = lazy(() => import("@/pages/ActivityPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
+const RevenuePage = lazy(() => import("@/pages/RevenuePage"));
+const ReportsPage = lazy(() => import("@/pages/ReportsPage"));
+const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
+const NotificationsPage = lazy(() => import("@/pages/NotificationsPage"));
+const IntegrationsPage = lazy(() => import("@/pages/IntegrationsPage"));
 
 function RenderErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
   return (
@@ -63,12 +71,18 @@ function RootLayout() {
 }
 
 export const router = createBrowserRouter([
-    {
-      path: "/",
+  {
+    path: "/",
     element: <RootLayout />,
     errorElement: <RouteErrorPage />,
     children: [
-      { index: true, element: <IndexRedirect /> },
+      {
+        element: <MarketingLayout />,
+        children: [
+          { index: true, element: <LandingPage /> },
+          { path: "pricing", element: <PricingPage /> },
+        ],
+      },
       {
         path: "login",
         element: <AuthLayout />,
@@ -94,9 +108,16 @@ export const router = createBrowserRouter([
               { index: true, element: <Navigate to="overview" replace /> },
               { path: "overview", element: <OverviewPage /> },
               { path: "analytics", element: <AnalyticsPage /> },
-              { path: "users", element: <UsersPage /> },
+              { path: "revenue", element: <RevenuePage /> },
+              { path: "customers", element: <UsersPage /> },
+              { path: "team", element: <UsersPage /> },
               { path: "subscriptions", element: <SubscriptionsPage /> },
-              { path: "sales", element: <SalesPage /> },
+              { path: "reports", element: <ReportsPage /> },
+              { path: "insights", element: <InsightsPage /> },
+              { path: "notifications", element: <NotificationsPage /> },
+              { path: "integrations", element: <IntegrationsPage /> },
+              { path: "users", element: <Navigate to={paths.customers} replace /> },
+              { path: "sales", element: <Navigate to={paths.revenue} replace /> },
               { path: "invoices", element: <InvoicesPage /> },
               { path: "tasks", element: <TasksPage /> },
               { path: "activity", element: <ActivityPage /> },

@@ -48,6 +48,14 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        glow: "0 0 48px -10px hsl(var(--primary) / 0.35), 0 0 80px -24px hsl(270 85% 65% / 0.2)",
+        glass: "var(--elev-1, 0 1px 0 hsl(0 0% 100% / 0.04)), 0 18px 48px -24px hsl(0 0% 0% / 0.45)",
+      },
+      backgroundImage: {
+        "gradient-radial-brand":
+          "radial-gradient(ellipse 80% 60% at 50% -30%, hsl(var(--primary) / 0.22), transparent 55%)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

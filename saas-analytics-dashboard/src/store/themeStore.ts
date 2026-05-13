@@ -16,7 +16,7 @@ export const useThemeStore = create(
     setTheme: (t: Theme) => void;
   }>(
     (set) => ({
-      theme: "system",
+      theme: "dark",
       setTheme: (theme) => {
         set({ theme });
         applyThemeClass(theme);

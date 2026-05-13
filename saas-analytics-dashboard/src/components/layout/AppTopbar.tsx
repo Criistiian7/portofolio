@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Menu, Moon, PanelLeftClose, PanelLeft, Search, Sun, Laptop } from "lucide-react";
+import { LogOut, Menu, Moon, PanelLeftClose, PanelLeft, Search, Sun, Laptop, Command } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/store/uiStore";
@@ -10,6 +10,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { signOutUser } from "@/services/auth";
 import { paths } from "@/lib/paths";
 import { Button } from "@/components/ui/button";
+import { MetricFlowLogo } from "@/brand/MetricFlowLogo";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -32,6 +33,7 @@ export function AppTopbar() {
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const globalSearch = useUiStore((s) => s.globalSearch);
   const setGlobalSearch = useUiStore((s) => s.setGlobalSearch);
+  const setCommandOpen = useUiStore((s) => s.setCommandOpen);
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
   const debounced = useDebounce(globalSearch, 300);
@@ -81,11 +83,18 @@ export function AppTopbar() {
         >
           <Menu className="h-5 w-5" />
         </Button>
+        <Link
+          to={paths.overview}
+          className="flex shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="MetricFlow dashboard home"
+        >
+          <MetricFlowLogo variant="mark" className="h-8 w-8 md:hidden" />
+        </Link>
         <div className="relative mx-auto hidden max-w-md flex-1 md:block">
           <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             aria-label="Global search"
-            placeholder="Search users, tasks, invoices…"
+            placeholder="Search customers, tasks, invoices…"
             className="pl-9"
             value={globalSearch}
             onChange={(e) => setGlobalSearch(e.target.value)}
@@ -95,6 +104,16 @@ export function AppTopbar() {
           </span>
         </div>
         <div className="ml-auto flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="hidden sm:inline-flex"
+            aria-label="Keyboard shortcuts"
+            onClick={() => setCommandOpen(true)}
+          >
+            <Command className="h-5 w-5" />
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
