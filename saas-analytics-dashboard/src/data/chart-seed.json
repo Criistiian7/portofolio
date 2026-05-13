@@ -1,0 +1,27 @@
+{
+  "revenueSeries": [
+    { "period": "Jan", "revenue": 12000, "mrr": 8200 },
+    { "period": "Feb", "revenue": 14200, "mrr": 8800 },
+    { "period": "Mar", "revenue": 13800, "mrr": 9100 },
+    { "period": "Apr", "revenue": 16500, "mrr": 9600 },
+    { "period": "May", "revenue": 17200, "mrr": 10100 },
+    { "period": "Jun", "revenue": 18900, "mrr": 10800 }
+  ],
+  "channelBars": [
+    { "label": "Organic", "value": 38 },
+    { "label": "Paid", "value": 27 },
+    { "label": "Partner", "value": 18 },
+    { "label": "Referral", "value": 17 }
+  ],
+  "planPie": [
+    { "name": "Starter", "value": 42 },
+    { "name": "Growth", "value": 33 },
+    { "name": "Enterprise", "value": 25 }
+  ],
+  "cohortBars": [
+    { "label": "Q1", "value": 88 },
+    { "label": "Q2", "value": 92 },
+    { "label": "Q3", "value": 95 },
+    { "label": "Q4", "value": 97 }
+  ]
+}
