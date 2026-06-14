@@ -1,18 +1,16 @@
 import { AMENITY_GROUPS } from "@/data/booking";
 import type { LucideIcon } from "lucide-react";
 import {
+  BedDouble,
+  Bike,
+  Camera,
   Crown,
+  Flame,
   Package,
-  Sparkles,
   Sun,
   Tent,
-  Wind,
-  Zap,
-  Flame,
-  Bike,
-  BedDouble,
-  Camera,
   Users,
+  Wind,
 } from "lucide-react";
 
 export type AmenityGroupId = (typeof AMENITY_GROUPS)[number]["id"];
@@ -66,5 +64,3 @@ export const AMENITY_PREVIEW_ITEMS: {
   { label: "Cameră marșarier", icon: Camera, groupId: "premium" },
   { label: "5 locuri · Fiat Ducato 2026", icon: Users, groupId: "premium" },
 ];
-
-export { Sparkles };
