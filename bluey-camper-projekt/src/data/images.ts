@@ -18,6 +18,25 @@ export const IMAGES = {
     width: 800,
     height: 600,
   },
+  rezervareHero: {
+    src: "/images/bluey-copertina.jpg",
+    alt: "Autorulota Bluey cu copertina deschisă, pregătită pentru vacanță",
+    width: 800,
+    height: 600,
+  },
+  /** Placeholder până la fotografii dedicate interior */
+  interiorDormitor: {
+    src: "/images/bluey-copertina.jpg",
+    alt: "Zona de dormit principală — Autorulota Bluey",
+  },
+  interiorAlcova: {
+    src: "/images/bluey-brand-telefon.jpg",
+    alt: "Pat alcovă de deasupra cabinei șofer — Autorulota Bluey",
+  },
+  interiorLiving: {
+    src: "/images/bluey-peisaj.jpg",
+    alt: "Pat extensibil în zona living — Autorulota Bluey",
+  },
   manastire: {
     src: "/images/bluey-manastire.jpg",
     alt: "Autorulota Bluey lângă o mănăstire din România",

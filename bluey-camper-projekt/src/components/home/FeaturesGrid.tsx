@@ -1,5 +1,6 @@
 import { Car, Heart, MapPin, Mountain } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 type Feature = {
   icon: LucideIcon;
@@ -11,22 +12,22 @@ type Feature = {
 const features: Feature[] = [
   {
     icon: Car,
-    title: "Autorulotă echipată",
+    title: "Închiriere all-inclusive",
     description:
-      "Bluey este pregătită pentru drumuri lungi: confort, spațiu și tot ce ai nevoie pentru o experiență sigură în România.",
+      "Fiat Ducato 2026, 5 locuri — dotări premium, panouri solare și lenjerii incluse. De la 90 €/noapte, fără costuri ascunse la dotări.",
   },
   {
     icon: MapPin,
     secondaryIcon: Mountain,
-    title: "Călătorii prin România",
+    title: "România la volanul tău",
     description:
-      "De la poieni la mănăstiri și peisaje montane — descoperim țara împreună, cu rute adaptate grupurilor educative.",
+      "De la poieni la mănăstiri și peisaje montane — autorulota e pregătită pentru drumuri lungi, cu confort pentru familii și grupuri mici.",
   },
   {
     icon: Heart,
-    title: "Misiune socială",
+    title: "Călătorie cu impact",
     description:
-      "90% din profit finanțează vacanțe gratuite pentru elevii din mediul rural — comunele Pogăceaua și Cristești, jud. Mureș.",
+      "90% din profit finanțează vacanțe gratuite pentru elevii din Pogăceaua și Cristești, jud. Mureș — Travel & Educate cu sens.",
   },
 ];
 
@@ -37,8 +38,8 @@ export function FeaturesGrid() {
         Travel & Educate cu Bluey
       </h2>
       <p className="mt-2 max-w-2xl text-muted-foreground">
-        O autorulotă, drumuri prin România și un impact real în comunitățile
-        rurale.
+        Închiriază autorulota pentru vacanța ta și susține simultan misiunea
+        socială din comunitățile rurale.
       </p>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((feature) => {
@@ -69,6 +70,14 @@ export function FeaturesGrid() {
           );
         })}
       </div>
+      <p className="mt-8 text-center">
+        <Link
+          to="/rezervare"
+          className="text-sm font-semibold text-brand hover:text-brand-deep"
+        >
+          Detalii rezervare și tarife →
+        </Link>
+      </p>
     </section>
   );
 }

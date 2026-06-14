@@ -1,7 +1,10 @@
 import { PageShell } from "@/components/PageShell";
+import { AmenitiesPreviewSection } from "@/components/home/AmenitiesPreviewSection";
+import { BookingCtaSection } from "@/components/home/BookingCtaSection";
 import { FeaturesGrid } from "@/components/home/FeaturesGrid";
 import { HeroSection } from "@/components/home/HeroSection";
 import { ImpactBand } from "@/components/home/ImpactBand";
+import { PricingTeaserSection } from "@/components/home/PricingTeaserSection";
 import { IMAGES } from "@/data/images";
 import { SEO } from "@/data/site";
 import { buildPageHead } from "@/lib/seoHead";
@@ -29,12 +32,17 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   return (
-    <PageShell>
+    <PageShell showMobileBookingBar>
       <HeroSection />
+      <PricingTeaserSection />
       <ImpactBand />
+      <AmenitiesPreviewSection />
       <FeaturesGrid />
       <Suspense fallback={null}>
         <GallerySection />
+      </Suspense>
+      <BookingCtaSection />
+      <Suspense fallback={null}>
         <SocialSection />
       </Suspense>
     </PageShell>

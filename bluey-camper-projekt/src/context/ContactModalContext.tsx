@@ -7,9 +7,10 @@ import {
   type ReactNode,
 } from "react";
 import { ContactModal } from "@/components/ContactModal";
+import type { ContactIntent } from "@/data/site";
 
 type ContactModalContextValue = {
-  openModal: () => void;
+  openModal: (intent?: ContactIntent) => void;
   closeModal: () => void;
 };
 
@@ -19,8 +20,13 @@ const ContactModalContext = createContext<ContactModalContextValue | null>(
 
 export function ContactModalProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [intent, setIntent] = useState<ContactIntent>("mission");
 
-  const openModal = useCallback(() => setOpen(true), []);
+  const openModal = useCallback((nextIntent: ContactIntent = "mission") => {
+    setIntent(nextIntent);
+    setOpen(true);
+  }, []);
+
   const closeModal = useCallback(() => setOpen(false), []);
 
   const value = useMemo(
@@ -31,7 +37,7 @@ export function ContactModalProvider({ children }: { children: ReactNode }) {
   return (
     <ContactModalContext.Provider value={value}>
       {children}
-      <ContactModal open={open} onClose={closeModal} />
+      <ContactModal open={open} intent={intent} onClose={closeModal} />
     </ContactModalContext.Provider>
   );
 }

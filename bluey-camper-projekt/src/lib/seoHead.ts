@@ -6,28 +6,45 @@ type SeoConfig = {
   description: string;
   ogImage: string;
   ogImageAlt: string;
+  canonicalPath?: string;
 };
 
 type PageHeadOptions = {
   /** Hero LCP — preload în <head> (doar pe ruta curentă) */
   preloadImages?: readonly string[];
+  /** JSON-LD suplimentar (ex. Offer pe /rezervare) */
+  jsonLd?: Record<string, unknown> | readonly Record<string, unknown>[];
 };
 
 export function buildPageHead(
-  { title, description, ogImage, ogImageAlt }: SeoConfig,
+  { title, description, ogImage, ogImageAlt, canonicalPath }: SeoConfig,
   options?: PageHeadOptions,
 ) {
   const ogImageUrl = absoluteUrl(ogImage);
   const twitterHandle = SITE.social.instagram.handle.replace(/^@/, "");
 
-  const links =
-    options?.preloadImages?.map((href) => ({
+  const links = [
+    ...(options?.preloadImages?.map((href) => ({
       rel: "preload" as const,
       as: "image" as const,
       href,
       type: "image/jpeg",
       fetchPriority: "high" as const,
-    })) ?? [];
+    })) ?? []),
+    ...(canonicalPath
+      ? [{ rel: "canonical" as const, href: absoluteUrl(canonicalPath) }]
+      : []),
+  ];
+
+  const jsonLdScripts =
+    options?.jsonLd === undefined
+      ? []
+      : (Array.isArray(options.jsonLd) ? options.jsonLd : [options.jsonLd]).map(
+          (schema) => ({
+            type: "application/ld+json" as const,
+            children: JSON.stringify(schema),
+          }),
+        );
 
   return {
     links,
@@ -50,5 +67,6 @@ export function buildPageHead(
       { name: "twitter:image", content: ogImageUrl },
       { name: "twitter:image:alt", content: ogImageAlt },
     ],
+    scripts: jsonLdScripts,
   };
 }

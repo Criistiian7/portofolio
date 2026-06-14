@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RezervareRouteImport } from './routes/rezervare'
 import { Route as MisiuneaSocialaRouteImport } from './routes/misiunea-sociala'
 import { Route as IndexRouteImport } from './routes/index'
 
+const RezervareRoute = RezervareRouteImport.update({
+  id: '/rezervare',
+  path: '/rezervare',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MisiuneaSocialaRoute = MisiuneaSocialaRouteImport.update({
   id: '/misiunea-sociala',
   path: '/misiunea-sociala',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/misiunea-sociala': typeof MisiuneaSocialaRoute
+  '/rezervare': typeof RezervareRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/misiunea-sociala': typeof MisiuneaSocialaRoute
+  '/rezervare': typeof RezervareRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/misiunea-sociala': typeof MisiuneaSocialaRoute
+  '/rezervare': typeof RezervareRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/misiunea-sociala'
+  fullPaths: '/' | '/misiunea-sociala' | '/rezervare'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/misiunea-sociala'
-  id: '__root__' | '/' | '/misiunea-sociala'
+  to: '/' | '/misiunea-sociala' | '/rezervare'
+  id: '__root__' | '/' | '/misiunea-sociala' | '/rezervare'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MisiuneaSocialaRoute: typeof MisiuneaSocialaRoute
+  RezervareRoute: typeof RezervareRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rezervare': {
+      id: '/rezervare'
+      path: '/rezervare'
+      fullPath: '/rezervare'
+      preLoaderRoute: typeof RezervareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/misiunea-sociala': {
       id: '/misiunea-sociala'
       path: '/misiunea-sociala'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MisiuneaSocialaRoute: MisiuneaSocialaRoute,
+  RezervareRoute: RezervareRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

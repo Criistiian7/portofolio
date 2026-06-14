@@ -1,14 +1,32 @@
-import { CONTACT, SITE } from "@/data/site";
-import { MessageCircle, Phone, X } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { buildWhatsappUrl, CONTACT, SITE, type ContactIntent } from "@/data/site";
+import { Phone, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 type ContactModalProps = {
   open: boolean;
+  intent: ContactIntent;
   onClose: () => void;
 };
 
-export function ContactModal({ open, onClose }: ContactModalProps) {
+const modalCopy: Record<ContactIntent, { title: string; description: string }> =
+  {
+    booking: {
+      title: "Rezervă Autorulota Bluey",
+      description:
+        "Sună sau scrie-ne pe WhatsApp cu perioada dorită — îți confirmăm disponibilitatea și detaliile rezervării.",
+    },
+    mission: {
+      title: `Contactează ${SITE.brand}`,
+      description:
+        "Alege cum vrei să ne contactezi despre călătoriile educative și misiunea Travel & Educate.",
+    },
+  };
+
+export function ContactModal({ open, intent, onClose }: ContactModalProps) {
   const callButtonRef = useRef<HTMLAnchorElement>(null);
+  const copy = modalCopy[intent];
+  const whatsappUrl = buildWhatsappUrl(intent);
 
   useEffect(() => {
     if (!open) return;
@@ -61,29 +79,26 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
           id="contact-modal-title"
           className="font-display pr-8 text-xl font-bold text-ink"
         >
-          Contactează {SITE.brand}
+          {copy.title}
         </h2>
-        <p className="mt-2 text-sm text-muted">
-          Alege cum vrei să ne contactezi despre călătoriile educative și
-          misiunea Travel & Educate.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{copy.description}</p>
 
         <div className="mt-6 flex flex-col gap-3">
           <a
             ref={callButtonRef}
             href={CONTACT.tel}
-            className="interactive-lift flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 font-semibold text-accent-foreground hover:bg-accent-deep"
+            className="interactive-lift flex items-center justify-center gap-2.5 rounded-xl bg-accent px-4 py-3.5 font-semibold text-accent-foreground hover:bg-accent-deep"
           >
-            <Phone className="size-5" aria-hidden />
-            Sună acum!
+            <Phone className="size-5 text-accent-foreground" aria-hidden />
+            Sună acum
           </a>
           <a
-            href={CONTACT.whatsappUrl}
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="interactive-lift flex items-center justify-center gap-2 rounded-xl border-2 border-whatsapp bg-whatsapp/10 px-4 py-3 font-semibold text-ink hover:bg-whatsapp/20"
+            className="interactive-lift flex items-center justify-center gap-2.5 rounded-xl border-2 border-whatsapp bg-whatsapp/10 px-4 py-3.5 font-semibold text-ink hover:bg-whatsapp/20"
           >
-            <MessageCircle className="size-5 text-whatsapp" aria-hidden />
+            <WhatsAppIcon className="size-5" accent />
             Lasă un mesaj
           </a>
         </div>

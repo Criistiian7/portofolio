@@ -1,3 +1,5 @@
+import { WHATSAPP_BOOKING_MESSAGE } from "@/data/booking";
+
 export const BRAND_LOGO = {
   src: "/images/bluey-logo.png",
   alt: "Bluey Autorulota — logo",
@@ -54,23 +56,34 @@ export const SOCIAL_BRAND = {
   },
 } as const;
 
+export type ContactIntent = "mission" | "booking";
+
 const WHATSAPP_PHONE = "40742652698";
 
-const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(SITE.whatsappMessage)}`;
+const WHATSAPP_MESSAGES: Record<ContactIntent, string> = {
+  mission: SITE.whatsappMessage,
+  booking: WHATSAPP_BOOKING_MESSAGE,
+};
+
+export function buildWhatsappUrl(intent: ContactIntent = "mission"): string {
+  return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(WHATSAPP_MESSAGES[intent])}`;
+}
 
 export const CONTACT = {
   tel: SITE.phoneTel,
-  whatsappUrl,
+  whatsappUrl: buildWhatsappUrl("mission"),
+  whatsappBookingUrl: buildWhatsappUrl("booking"),
 } as const;
 
 export const SEO = {
   home: {
-    title: "Autorulota Bluey | Călătorii educative în România",
+    title: "Autorulota Bluey | Închiriere autorulotă din 90€/noapte",
     description:
-      "Autorulotă pentru călătorii educative în România — Travel & Educate. 90% din profit pentru elevi din Pogăceaua și Cristești, jud. Mureș, în lupta cu abandonul școlar.",
+      "Închiriază autorulota Bluey — Fiat Ducato 2026, 5 locuri, de la 90€/noapte. Travel & Educate: 90% din profit pentru elevi din Pogăceaua și Cristești, jud. Mureș.",
     ogImage: "/images/bluey-poiana.jpg",
     ogImageAlt:
       "Autorulota Bluey pe o poiană din România, cu peisaj montan în fundal",
+    canonicalPath: "/",
   },
   misiune: {
     title: "Misiune socială — abandon școlar, Mureș | Bluey",
@@ -78,6 +91,16 @@ export const SEO = {
       "Excursii educative și tabere gratuite pentru elevii din Pogăceaua și Cristești, jud. Mureș. Autorulota Bluey — Travel & Educate împotriva abandonului școlar.",
     ogImage: "/images/bluey-pajiste.jpg",
     ogImageAlt: "Autorulota Bluey pe o pajișe verde din România",
+    canonicalPath: "/misiunea-sociala",
+  },
+  rezervare: {
+    title: "Rezervare autorulotă Bluey | de la 90€/noapte",
+    description:
+      "Tarife, dotări și condiții pentru închirierea Autorulotei Bluey — Fiat Ducato 2026, 5 locuri, jud. Mureș. Extrasezon 90€, sezon de vârf 140€/noapte.",
+    ogImage: "/images/bluey-copertina.jpg",
+    ogImageAlt:
+      "Autorulota Bluey cu copertina deschisă, pregătită pentru o pauză",
+    canonicalPath: "/rezervare",
   },
   defaultTitle: "Autorulota Bluey | Travel and Educate",
   defaultDescription:

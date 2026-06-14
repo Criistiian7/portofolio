@@ -18,19 +18,28 @@ Copiază cele **6 fotografii reale** în `public/images/` (vezi `public/images/R
 
 | Rută | Fișier |
 |------|--------|
-| `/` | `src/routes/index.tsx` |
+| `/` | `src/routes/index.tsx` — hero, tarife teaser, dotări preview, misiune |
+| `/rezervare` | `src/routes/rezervare.tsx` — tarife, paturi, dotări, condiții |
 | `/misiunea-sociala` | `src/routes/misiunea-sociala.tsx` |
+
+## Conținut rezervare
+
+Toate tarifele, dotările, paturile și condițiile sunt în **`src/data/booking.ts`**. La modificări de preț sau sezon, actualizează doar acest fișier.
+
+Plan de implementare detaliat: [`docs/bluey-feature-implementation-plan.md`](docs/bluey-feature-implementation-plan.md).
 
 ## Contact
 
-Toate CTA-urile principale deschid un modal cu:
+CTA-urile de rezervare deschid modal cu intent `booking`:
 
 - **Sună acum** → `tel:+40742652698`
-- **Lasă un mesaj** → WhatsApp cu mesaj pre-completat în română
+- **Rezervă pe WhatsApp** → mesaj pre-completat cu placeholder pentru date
+
+CTA-urile generice (header) folosesc intent `mission`.
 
 ## SEO / share social
 
-`head()` per rută: `robots`, Open Graph, Twitter Card, preload LCP doar pe ruta curentă. JSON-LD `Organization` în `__root.tsx`. `public/robots.txt` permite indexarea.
+`head()` per rută: `robots`, canonical, Open Graph, Twitter Card, preload LCP doar pe Home. JSON-LD `Organization` în `__root.tsx`; JSON-LD `Product`/`Offer` pe `/rezervare`. `public/sitemap.xml` și `public/robots.txt`.
 
 La deploy, setează în `.env.production`:
 
@@ -38,7 +47,7 @@ La deploy, setează în `.env.production`:
 VITE_SITE_URL=https://domeniul-tau.ro
 ```
 
-Astfel `og:image` și logo-ul din schema devin URL-uri absolute pentru Facebook/WhatsApp. Opțional: `link rel="canonical"` / `og:url` cu același domeniu.
+Astfel `og:image`, canonical și schema devin URL-uri absolute.
 
 ## Build
 
