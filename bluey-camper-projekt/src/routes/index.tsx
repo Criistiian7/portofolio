@@ -25,7 +25,7 @@ const SocialSection = lazy(() =>
 export const Route = createFileRoute("/")({
   head: () =>
     buildPageHead(SEO.home, {
-      preloadImages: [IMAGES.hero.src],
+      preloadImages: [IMAGES.heroCover.src],
     }),
   component: HomePage,
 });

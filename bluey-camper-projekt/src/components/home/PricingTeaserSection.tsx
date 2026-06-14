@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 
 export function PricingTeaserSection() {
   return (
-    <section className="bg-brand/5 py-12 sm:py-16">
+    <section className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2 className="font-display text-3xl font-bold text-navy">
           Tarife de la 90 €/noapte

@@ -5,9 +5,11 @@ import { Phone } from "lucide-react";
 
 type ContactButtonProps = {
   size?: "sm" | "lg";
-  variant?: "brand" | "light";
+  variant?: "brand" | "light" | "gradient";
   intent?: ContactIntent;
   label?: string;
+  /** Hide WhatsApp icon below `sm` — useful when modal already offers WhatsApp */
+  iconLayout?: "default" | "phone-only-mobile";
   className?: string;
 };
 
@@ -20,6 +22,8 @@ const variantClasses = {
   brand: "bg-brand text-brand-foreground hover:bg-brand-deep",
   light:
     "bg-card text-brand shadow-md hover:bg-background hover:text-brand-deep",
+  gradient:
+    "bg-gradient-to-br from-brand to-brand-deep text-brand-foreground shadow-lg shadow-brand/30 hover:shadow-xl hover:shadow-brand/40",
 } as const;
 
 const defaultLabels: Record<ContactIntent, string> = {
@@ -32,12 +36,15 @@ export function ContactButton({
   variant = "brand",
   intent = "mission",
   label,
+  iconLayout = "default",
   className = "",
 }: ContactButtonProps) {
   const { openModal } = useContactModal();
   const iconClass =
     variant === "light" ? "text-brand" : "text-brand-foreground";
+  const whatsappAccent = variant === "brand" || variant === "gradient";
   const buttonLabel = label ?? defaultLabels[intent];
+  const hideWhatsappOnMobile = iconLayout === "phone-only-mobile";
 
   return (
     <button
@@ -48,8 +55,8 @@ export function ContactButton({
       <span className="inline-flex items-center gap-1.5" aria-hidden>
         <Phone className={`size-4 shrink-0 ${iconClass}`} />
         <WhatsAppIcon
-          className="size-4 shrink-0"
-          accent={variant === "brand"}
+          className={`size-4 shrink-0 ${hideWhatsappOnMobile ? "hidden sm:inline-flex" : ""}`}
+          accent={whatsappAccent}
         />
       </span>
       {buttonLabel}

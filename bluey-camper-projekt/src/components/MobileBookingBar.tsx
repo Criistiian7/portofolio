@@ -1,7 +1,5 @@
 import { useContactModal } from "@/context/ContactModalContext";
-import { BOOKING } from "@/data/booking";
-import { buildWhatsappUrl } from "@/data/site";
-import { MessageCircle, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function MobileBookingBar() {
@@ -26,24 +24,15 @@ export function MobileBookingBar() {
       role="region"
       aria-label="Rezervare rapidă"
     >
-      <div className="mx-auto flex max-w-lg items-center gap-2">
+      <div className="mx-auto max-w-lg">
         <button
           type="button"
           onClick={() => openModal("booking")}
-          className="interactive-lift inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-brand-foreground"
+          className="interactive-lift inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-brand-foreground"
         >
           <Phone className="size-4" aria-hidden />
           Rezervă acum
         </button>
-        <a
-          href={buildWhatsappUrl("booking")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="interactive-lift inline-flex items-center justify-center rounded-full border-2 border-whatsapp bg-whatsapp/10 p-3 text-whatsapp"
-          aria-label={`WhatsApp — ${BOOKING.startingPriceLabel}`}
-        >
-          <MessageCircle className="size-5" aria-hidden />
-        </a>
       </div>
     </div>
   );

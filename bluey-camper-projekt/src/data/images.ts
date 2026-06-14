@@ -2,6 +2,8 @@ import type { SiteImage } from "@/types/image";
 
 const HERO_ALT =
   "Autorulota Bluey pe o poiană din România, cu peisaj montan în fundal";
+const HERO_COVER_ALT =
+  "Autorulota Bluey în peisaj montan din România, cu masă de camping";
 const PAJISTE_ALT = "Autorulota Bluey pe o pajișe verde din România";
 
 /** 6 fotografii — fiecare folosită cel puțin o dată în site */
@@ -11,6 +13,12 @@ export const IMAGES = {
     alt: HERO_ALT,
     width: 800,
     height: 600,
+  },
+  heroCover: {
+    src: "/images/new-cover.png",
+    alt: HERO_COVER_ALT,
+    width: 1920,
+    height: 1080,
   },
   pajisteHero: {
     src: "/images/bluey-pajiste.jpg",
