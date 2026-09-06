@@ -43,9 +43,8 @@ export function HeroSection() {
               <span className="hero-headline-script hero-headline-script--emphasis">
                 călătorește
               </span>{" "}
-              <span> și educă în</span>
+              <span> și educă </span>
             </span>
-            <span className="hero-headline-romania mt-1.5 block">România</span>
           </h1>
 
           <p className="mt-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
