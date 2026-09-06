@@ -41,9 +41,9 @@ export function HeroSection() {
             <span className="block">Închiriază autorulota Bluey —</span>
             <span className="mt-1 block leading-[1.15]">
               <span className="hero-headline-script hero-headline-script--emphasis">
-                călătorește
+                călătorește 
               </span>{" "}
-              <span> și educă </span>
+              <span> și <span className="hero-headline-script hero-headline-script--emphasis"> educă </span>
             </span>
           </h1>
 
